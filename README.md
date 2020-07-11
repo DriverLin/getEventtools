@@ -1,5 +1,5 @@
-# getEventtools
-## 在系统底层实现鼠标键盘映射触屏，延迟极低
+# exclusive_mode_mapper
+## 在系统底层实现鼠标键盘映射触屏
 ## PS: 没ROOT可以不看了
 # 说明
 > ### 安卓的底层Linux通过/dev/input/eventX来实现对输入输出设备的管理
