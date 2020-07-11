@@ -1,0 +1,62 @@
+/dev/input/event15: 0004 0004 00090001
+/dev/input/event15: 0001 0110 00000001
+/dev/input/event15: 0000 0000 00000000
+
+/dev/input/event15: 0004 0004 00090001
+/dev/input/event15: 0001 0110 00000000
+/dev/input/event15: 0000 0000 00000000
+
+
+/dev/input/event15: EV_MSC       MSC_SCAN             00090001
+/dev/input/event15: EV_KEY       BTN_MOUSE            DOWN
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event15: EV_MSC       MSC_SCAN             00090001
+/dev/input/event15: EV_KEY       BTN_MOUSE            UP
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+左键
+
+
+/dev/input/event15: 0004 0004 00090002
+/dev/input/event15: 0001 0111 00000001
+/dev/input/event15: 0000 0000 00000000
+
+/dev/input/event15: 0004 0004 00090002
+/dev/input/event15: 0001 0111 00000000
+/dev/input/event15: 0000 0000 00000000
+
+
+/dev/input/event15: EV_MSC       MSC_SCAN             00090002
+/dev/input/event15: EV_KEY       BTN_RIGHT            DOWN
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event15: EV_MSC       MSC_SCAN             00090002
+/dev/input/event15: EV_KEY       BTN_RIGHT            UP
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+右键
+
+
+
+
+
+
+/dev/input/event15: EV_REP       REP_DELAY            00000000
+/dev/input/event15: EV_REP       REP_PERIOD           00000000
+/dev/input/event15: EV_MSC       MSC_SCAN             00070047
+/dev/input/event15: EV_KEY       KEY_SCROLLLOCK       DOWN
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event15: EV_MSC       MSC_SCAN             00070047
+/dev/input/event15: EV_KEY       KEY_SCROLLLOCK       UP
+/dev/input/event15: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event15: 0011 0002 00000001
+/dev/input/event15: 0004 0004 00070047
+/dev/input/event15: 0001 0046 00000001
+/dev/input/event15: 0000 0000 00000000
+
+/dev/input/event15: 0004 0004 00070047
+/dev/input/event15: 0001 0046 00000000
+/dev/input/event15: 0000 0000 00000000
