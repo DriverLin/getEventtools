@@ -1,4 +1,4 @@
-# exclusive_mode_mapper
+# Exclusive_mode_mapper
 ## 在系统底层实现鼠标键盘映射触屏
 ## PS: 没ROOT可以不看了
 # 说明
