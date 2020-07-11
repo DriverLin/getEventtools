@@ -4,8 +4,8 @@ import socket
 import time
 
 udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# sendArr = ('192.168.3.8', 8848)
-sendArr = ('192.168.137.55', 8848)
+sendArr = ('192.168.3.8', 8848)
+# sendArr = ('192.168.137.55', 8848)
 
 # 目前只考虑写入到event5 电源键对event0 音量对event9
 

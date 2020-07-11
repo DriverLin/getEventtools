@@ -20,7 +20,6 @@ struct input_event m_q[16];     //鼠标信号队列
 int m_len = 0;                  //队列长度
 struct input_event k_q[16];     //键盘信号队列
 int k_len = 0;                  //键盘队列长度
-
 int touch_id[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int postion[10][2];
 int allocatedID_num = 0;
@@ -37,6 +36,7 @@ struct input_event btn_up = {NULL, EV_KEY, BTN_TOUCH, DOWN};    //释放 触摸�
 //超出10点个不响应
 //返回触摸点的ID 下次带上
 //鼠标的映射 鼠标一开始就占一个 切换后才释放 是申请还是移动 在外边判断
+
 int mapper(int type, int unclear_id, int x, int y)
 {
     // printf("%d\t%d\t%d\t%d\n", type, unclear_id, x, y);
@@ -135,8 +135,8 @@ int mapper(int type, int unclear_id, int x, int y)
 }
 
 int first_mouse_touch_id = -1; //鼠标映射的ID 唯一 第一次产生移动事件时按下 之后只有移动  切换映射的时候才释放
-int mouse_Start_x = 720;       ///开始结束坐标 只读
-int mouse_Start_y = 1600;      //中途可能有切换 还是会回到这里的
+int mouse_Start_x = 1000;      ///开始结束坐标 只读
+int mouse_Start_y = 1348;      //中途可能有切换 还是会回到这里的
 int realtive_x, realtive_y;    //保存当前移动坐标
 
 int km_map_id[256 + 16];      //键盘code 对应分配的ID 按下获取 然后存入 释放的时候就从这里获取ID释放
@@ -171,8 +171,8 @@ void handel_m_q() //处理鼠标动作
             realtive_y = mouse_Start_y; //相对X,Y
             return;
         }
-        realtive_x -= y;
-        realtive_y += x;
+        realtive_x += y;
+        realtive_y -= x;
         if (realtive_x < 100 || realtive_x > 1400 || realtive_y < 100 || realtive_y > 3000)
         {
             mapper(2, first_mouse_touch_id, 0, 0);
@@ -181,9 +181,8 @@ void handel_m_q() //处理鼠标动作
             realtive_x = mouse_Start_x;
             realtive_y = mouse_Start_y; //相对X,Y
         }
-
         mapper(0, first_mouse_touch_id, realtive_x, realtive_y); //移动
-        printf("[%d,%d]\n", realtive_x, realtive_y);
+        printf("relative : [%d,%d]\n", realtive_x, realtive_y);
     }
     else if (m_q[0].type == EV_MSC) //点击
     {
@@ -194,7 +193,7 @@ void handel_m_q() //处理鼠标动作
             mouse_code = 1;
         if (m_q[1].value == DOWN) //按下
         {
-            km_map_id[256 + mouse_code] = mapper(1, -1, map_postion[256 + mouse_code][0], map_postion[256 + mouse_code][1]);
+            km_map_id[256 + mouse_code] = mapper(1, -1, 800 + mouse_code * 100, 1000 + mouse_code * 100);
         }
         else if (m_q[1].value == UP) //释放
         {
@@ -206,12 +205,12 @@ void handel_m_q() //处理鼠标动作
 }
 
 int wheel_satuse[4];                                                                                                                    //默认为0 初始化时和结束时也手动清0
-int wheel_postion[9][2] = {{300, 300}, {600, 300}, {900, 300}, {300, 600}, {600, 600}, {900, 600}, {300, 900}, {600, 900}, {900, 900}}; //8个状态的坐标
+int wheel_postion[9][2] = {{100, 100}, {100, 200}, {100, 300}, {200, 100}, {200, 200}, {200, 300}, {300, 100}, {300, 200}, {300, 300}}; //8个状态的坐标
 int wheel_ID = -1;
 void change_wheel_satuse(int keyCode, int updown)
 {
     int x_Asix = 1 - wheel_satuse[1] + wheel_satuse[3];
-    int y_Asix = 1 - wheel_satuse[2] + wheel_satuse[0];
+    int y_Asix = 1 - wheel_satuse[2] + wheel_satuse[4];
     int last_map_value = x_Asix * 3 + y_Asix;
     int index = -1;
     switch (keyCode)
@@ -234,28 +233,25 @@ void change_wheel_satuse(int keyCode, int updown)
     x_Asix = 1 - wheel_satuse[1] + wheel_satuse[3];
     y_Asix = 1 - wheel_satuse[2] + wheel_satuse[0];
     int map_value = x_Asix * 3 + y_Asix;
-    // printf("[%d,%d,%d,%d]\n", wheel_satuse[0], wheel_satuse[1], wheel_satuse[2], wheel_satuse[3]);
-    // printf("x=%d,y=%d\n", x_Asix - 1, y_Asix - 1);
-    // printf("map_value=%d\n", map_value);
-    // return;
-    // printf("当前状态数组下标为%d\n", map_value);
+    printf("[%d,%d,%d,%d]\n", wheel_satuse[0], wheel_satuse[1], wheel_satuse[2], wheel_satuse[3]);
+    printf("x=%d,y=%d\n", x_Asix - 1, y_Asix - 1);
+    printf("map_value=%d\n", map_value);
     if (last_map_value == 4 && map_value != 4) //开始 先按下 再移动
     {
         wheel_ID = mapper(1, -1, wheel_postion[4][0], wheel_postion[4][1]);            //
         mapper(0, wheel_ID, wheel_postion[map_value][0], wheel_postion[map_value][1]); //移动
+        printf("按下，移动\n");
+    }
+    else if (map_value == 4)
+    {
+        printf("释放\n");
+        mapper(2, wheel_ID, 0, 0); //释放
+        wheel_ID = -1;
     }
     else
     {
-        if (map_value != 4)
-        {
-
-            mapper(0, wheel_ID, wheel_postion[map_value][0], wheel_postion[map_value][1]); //正常移动
-        }
-        else
-        {
-            mapper(2, wheel_ID, 0, 0); //释放
-            wheel_ID = -1;
-        }
+        printf("移动\n");
+        mapper(0, wheel_ID, wheel_postion[map_value][0], wheel_postion[map_value][1]); //正常移动
     }
 }
 
@@ -384,10 +380,10 @@ int Exclusive_mode(char *argv[])
     close(keyboard_fd);
     rcode = ioctl(mouse_fd, EVIOCGRAB, 1);
     close(mouse_fd);
-
     /*
     检查所有触摸点
     手动释放所有的点
+    关闭touch_fd指针
     first_mouse_touch_id = -1;
     */
     for (int i = 0; i < 4; i++)
@@ -396,13 +392,12 @@ int Exclusive_mode(char *argv[])
     {
         if (touch_id[i] != 0)
         {
-            mapper(2, i, 0, 0); //释放所有按键
+            mapper(2, i, 0, 0); //释放所有已经按下的按键
         }
     }
-
+    mapper(2, first_mouse_touch_id, 0, 0);
     first_mouse_touch_id = -1;
     close(touch_fd);
-
     return 0;
 }
 
@@ -438,34 +433,16 @@ int no_Exclusive_mode()
 
     return 0;
 }
-
-void rset_global()
+void rset()
 {
-    m_len = 0;
-    k_len = 0;
-    allocatedID_num = 0;
-    first_mouse_touch_id = -1;
-    wheel_ID = -1;
 }
-
 int main(int argc, char *argv[]) //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
-    map_postion[KEY_SPACE][0] = 438;
-    map_postion[KEY_SPACE][1] = 2932;
-
-    map_postion[KEY_R][0] = 110;
-    map_postion[KEY_R][1] = 2450;
-
-    map_postion[256][0] = 703;
-    map_postion[256][1] = 247;
-
-    map_postion[256 + 1][0] = 594;
-    map_postion[256 + 1][1] = 2753;
 
     while (1)
     {
         no_Exclusive_mode();
         Exclusive_mode(argv); //记得先插鼠标 再插键盘
-        rset_global();
+        rset();
     }
 }
