@@ -1,0 +1,168 @@
+{
+    "switchKey": "Key_QuoteLeft",
+    "mouseMoveMap": {
+        "startPos": {
+            "x": 0.51,
+            "y": 0.5
+        },
+        "speedRatio": 1
+    },
+    "keyMapNodes": [
+        {
+            "comment": "9",
+            "type": "KMT_CLICK",
+            "key": "Key_Tab",
+            "pos": {
+                "x": 0.0467436974789916,
+                "y": 0.08987485779294653
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "32",
+            "type": "KMT_CLICK",
+            "key": "Key_Space",
+            "pos": {
+                "x": 0.970063025210084,
+                "y": 0.6825938566552902
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "49",
+            "type": "KMT_CLICK",
+            "key": "Key_1",
+            "pos": {
+                "x": 0.5929621848739496,
+                "y": 0.8896473265073948
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "50",
+            "type": "KMT_CLICK",
+            "key": "Key_2",
+            "pos": {
+                "x": 0.5073529411764706,
+                "y": 0.8839590443686007
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "51",
+            "type": "KMT_CLICK",
+            "key": "Key_3",
+            "pos": {
+                "x": 0.3335084033613445,
+                "y": 0.8953356086461889
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "52",
+            "type": "KMT_CLICK",
+            "key": "Key_4",
+            "pos": {
+                "x": 0.3802521008403361,
+                "y": 0.89419795221843
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "53",
+            "type": "KMT_CLICK",
+            "key": "Key_5",
+            "pos": {
+                "x": 0.4269957983193277,
+                "y": 0.888509670079636
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "67",
+            "type": "KMT_CLICK",
+            "key": "Key_C",
+            "pos": {
+                "x": 0.8786764705882353,
+                "y": 0.9362912400455062
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "70",
+            "type": "KMT_CLICK",
+            "key": "Key_F",
+            "pos": {
+                "x": 0.5157563025210085,
+                "y": 0.78839590443686
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "71",
+            "type": "KMT_CLICK",
+            "key": "Key_G",
+            "pos": {
+                "x": 0.75,
+                "y": 0.9089874857792947
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "81",
+            "type": "KMT_CLICK",
+            "key": "Key_Q",
+            "pos": {
+                "x": 0.9585084033613446,
+                "y": 0.3833902161547213
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "82",
+            "type": "KMT_CLICK",
+            "key": "Key_R",
+            "pos": {
+                "x": 0.803046218487395,
+                "y": 0.8225255972696246
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "LeftButton",
+            "type": "KMT_CLICK",
+            "key": "LeftButton",
+            "pos": {
+                "x": 0.058823529411764705,
+                "y": 0.5290102389078498
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "RightButton",
+            "type": "KMT_CLICK",
+            "key": "RightButton",
+            "pos": {
+                "x": 0.9065126050420168,
+                "y": 0.5688282138794084
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "WHEEL",
+            "type": "KMT_STEER_WHEEL",
+            "centerPos": {
+                "x": 0.14,
+                "y": 0.75
+            },
+            "leftOffset": 0.1,
+            "rightOffset": 0.1,
+            "upOffset": 0.27,
+            "downOffset": 0.2,
+            "leftKey": "Key_A",
+            "rightKey": "Key_D",
+            "upKey": "Key_W",
+            "downKey": "Key_S"
+        }
+    ]
+}

@@ -1,0 +1,158 @@
+{
+    "switchKey": "Key_QuoteLeft",
+    "mouseMoveMap": {
+        "startPos": {
+            "x": 0.51,
+            "y": 0.5
+        },
+        "speedRatio": 1
+    },
+    "keyMapNodes": [
+        {
+            "comment": "32",
+            "type": "KMT_CLICK",
+            "key": "Key_Space",
+            "pos": {
+                "x": 0.9516806722689075,
+                "y": 0.7121729237770194
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "49",
+            "type": "KMT_CLICK",
+            "key": "Key_1",
+            "pos": {
+                "x": 0.4490546218487395,
+                "y": 0.8976109215017065
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "50",
+            "type": "KMT_CLICK",
+            "key": "Key_2",
+            "pos": {
+                "x": 0.5619747899159664,
+                "y": 0.888509670079636
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "67",
+            "type": "KMT_CLICK",
+            "key": "Key_C",
+            "pos": {
+                "x": 0.8497899159663865,
+                "y": 0.9408418657565415
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "69",
+            "type": "KMT_CLICK",
+            "key": "Key_E",
+            "pos": {
+                "x": 0.20903361344537816,
+                "y": 0.38111490329920367
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "70",
+            "type": "KMT_CLICK",
+            "key": "Key_F",
+            "pos": {
+                "x": 0.7715336134453782,
+                "y": 0.7792946530147895
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "71",
+            "type": "KMT_CLICK",
+            "key": "Key_G",
+            "pos": {
+                "x": 0.6596638655462185,
+                "y": 0.9374288964732651
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "77",
+            "type": "KMT_CLICK",
+            "key": "Key_M",
+            "pos": {
+                "x": 0.9212184873949579,
+                "y": 0.14448236632536973
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "81",
+            "type": "KMT_CLICK",
+            "key": "Key_Q",
+            "pos": {
+                "x": 0.14180672268907563,
+                "y": 0.3731513083048919
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "82",
+            "type": "KMT_CLICK",
+            "key": "Key_R",
+            "pos": {
+                "x": 0.7878151260504201,
+                "y": 0.9465301478953356
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "86",
+            "type": "KMT_CLICK",
+            "key": "Key_V",
+            "pos": {
+                "x": 0.9338235294117647,
+                "y": 0.9078498293515358
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "LeftButton",
+            "type": "KMT_CLICK",
+            "key": "LeftButton",
+            "pos": {
+                "x": 0.08140756302521009,
+                "y": 0.5130830489192264
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "RightButton",
+            "type": "KMT_CLICK",
+            "key": "RightButton",
+            "pos": {
+                "x": 0.9480042016806722,
+                "y": 0.5267349260523322
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "WHEEL",
+            "type": "KMT_STEER_WHEEL",
+            "centerPos": {
+                "x": 0.14,
+                "y": 0.75
+            },
+            "leftOffset": 0.1,
+            "rightOffset": 0.1,
+            "upOffset": 0.27,
+            "downOffset": 0.2,
+            "leftKey": "Key_A",
+            "rightKey": "Key_D",
+            "upKey": "Key_W",
+            "downKey": "Key_S"
+        }
+    ]
+}

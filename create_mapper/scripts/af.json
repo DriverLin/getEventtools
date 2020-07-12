@@ -1,0 +1,98 @@
+{
+    "switchKey": "Key_QuoteLeft",
+    "mouseMoveMap": {
+        "startPos": {
+            "x": 0.51,
+            "y": 0.5
+        },
+        "speedRatio": 1
+    },
+    "keyMapNodes": [
+        {
+            "comment": "32",
+            "type": "KMT_CLICK",
+            "key": "Key_Space",
+            "pos": {
+                "x": 0.9091386554621849,
+                "y": 0.9032992036405005
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "49",
+            "type": "KMT_CLICK",
+            "key": "Key_1",
+            "pos": {
+                "x": 0.657563025210084,
+                "y": 0.9306029579067122
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "69",
+            "type": "KMT_CLICK",
+            "key": "Key_E",
+            "pos": {
+                "x": 0.9065126050420168,
+                "y": 0.6405005688282139
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "81",
+            "type": "KMT_CLICK",
+            "key": "Key_Q",
+            "pos": {
+                "x": 0.9065126050420168,
+                "y": 0.4402730375426621
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "82",
+            "type": "KMT_CLICK",
+            "key": "Key_R",
+            "pos": {
+                "x": 0.7058823529411765,
+                "y": 0.9397042093287827
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "LeftButton",
+            "type": "KMT_CLICK",
+            "key": "LeftButton",
+            "pos": {
+                "x": 0.13813025210084034,
+                "y": 0.5244596131968146
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "RightButton",
+            "type": "KMT_CLICK",
+            "key": "RightButton",
+            "pos": {
+                "x": 0.21796218487394958,
+                "y": 0.447098976109215
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "WHEEL",
+            "type": "KMT_STEER_WHEEL",
+            "centerPos": {
+                "x": 0.14,
+                "y": 0.75
+            },
+            "leftOffset": 0.1,
+            "rightOffset": 0.1,
+            "upOffset": 0.27,
+            "downOffset": 0.2,
+            "leftKey": "Key_A",
+            "rightKey": "Key_D",
+            "upKey": "Key_W",
+            "downKey": "Key_S"
+        }
+    ]
+}

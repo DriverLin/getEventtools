@@ -63,8 +63,8 @@ linux_map = {
 }
 
 wheel_postion = []
-x_len = int(input("x长度:"))
-y_len = int(input("y长度"))
+x_len = 1440  # int(input("x长度:"))
+y_len = 3120  # int(input("y长度"))
 jsonpath = input("jsonpath:")
 config = ""
 """
@@ -77,9 +77,9 @@ code,x,y
 with open(jsonpath) as j:
     qtscrcpy_map = (json.load(j))
     mouse_start_x = int(
-        float(qtscrcpy_map["mouseMoveMap"]["startPos"]["x"]) * x_len)
+        float((1-qtscrcpy_map["mouseMoveMap"]["startPos"]["y"])) * x_len)
     mouse_start_y = int(
-        float(qtscrcpy_map["mouseMoveMap"]["startPos"]["y"]) * y_len)
+        float(qtscrcpy_map["mouseMoveMap"]["startPos"]["x"]) * y_len)
     speedRatio = int(qtscrcpy_map["mouseMoveMap"]["speedRatio"])
     if(speedRatio == 0):
         speedRatio = 1
@@ -87,11 +87,11 @@ with open(jsonpath) as j:
         " "+str(speedRatio)+"\n"
     for node in qtscrcpy_map["keyMapNodes"]:
         if(node["type"] == "KMT_STEER_WHEEL"):
-            x = int(float(node["centerPos"]["x"]) * x_len)
-            y = int(float(node["centerPos"]["y"]) * y_len)
-            offset = int(float(node["upOffset"]) * y_len)
+            x = int((1-float(node["centerPos"]["y"])) * x_len)
+            y = int(float(node["centerPos"]["x"]) * y_len)
+            offset = int(float(node["upOffset"]) * x_len)
             if(x-offset <= 0 or y - offset <= 0):
-                offset = min(x, y) - 100
+                offset = min(x, y) - 10
             config += "0 "+str(x-offset)+" "+str(y-offset)+"\n"
             config += "1 "+str(x)+" "+str(y-offset)+"\n"
             config += "2 "+str(x+offset)+" "+str(y-offset)+"\n"
@@ -104,8 +104,8 @@ with open(jsonpath) as j:
     for node in qtscrcpy_map["keyMapNodes"]:
         if(node["type"] == "KMT_CLICK"):
             key_code = linux_map[node["key"]]
-            x = int(float(node["pos"]["x"]) * x_len)
-            y = int(float(node["pos"]["y"]) * y_len)
+            x = int((1-float(node["pos"]["y"])) * x_len)
+            y = int(float(node["pos"]["x"]) * y_len)
             config += str(key_code)+" "+str(x)+" "+str(y)+"\n"
 print("["+config+"]")
 outPath = os.path.splitext(jsonpath)[0]+".mapper"
