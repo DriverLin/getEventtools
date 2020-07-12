@@ -1,16 +1,39 @@
 # Exclusive_mode_mapper
-## 在系统底层实现鼠标键盘映射触屏
-# 说明
-> ### 安卓的底层Linux通过/dev/input/eventX来实现对输入输出设备的管<br>root后可以直接对字符设备进行读写<br>程序工作时使用独占模式，读取键盘鼠标的输入，通过写设备文件映射操作到触屏<br>使用~键在键鼠正常使用和程序独占映射模式之间切换 <br>
-# 优点
-> * ### 在Linux底层完成映射，延迟级低。
-> * ### 不运行安卓程序，无法被检测。
-# 缺点
-> * ### 需要ROOT权限
-# 使用方法
-> ### 拷贝exclusive_mode_mapper.c到安卓终端内<br>执行 gcc exclusive_mode_mapper[fix_wheel/unfix_wheel].c -o exc;sudo exc /dev/input/event5 "映射脚本文件路径"<br>摇杆死区太小的游戏使用unfix_wheel,否则使用fix_wheel。<br>手动编写脚本，或者使用过create_mapper内的工具创建脚本<br>使用“获取位置.HTML”获取QTscrcpy的脚本是直接输出到剪切板的，粘贴保存到JSON文件，再使用transform.py转换为mapper文件<br>脚本的编码方式，可参照transform.py文件
-# 注意
-> ### 不同的手机型号对应的输入输出event不尽相同，可能需要自行修改event数字<br>通过getevent能看到自己的键盘鼠标设备号<br>键盘鼠标插入顺序决定序号
-# To Do
-> * ### ☑ ~~添加读取配置文件功能~~
-> * ### ☑ ~~通过PC或者直接在手机创建配置文件~~ 
+在系统底层实现鼠标键盘映射触屏
+## 说明
+安卓的底层Linux通过/dev/input/eventX来实现对输入输出设备的管
+
+root后可以直接对字符设备进行读写
+
+程序工作时使用独占模式，读取键盘鼠标的输入，通过写设备文件映射操作到触屏
+
+使用~键在键鼠正常使用和程序独占映射模式之间切换 
+
+
+## 优点
+* 在Linux底层完成映射，延迟级低。
+* 不运行安卓程序，无法被检测。
+## 缺点
+* 需要ROOT权限
+## 使用方法
+拷贝exclusive_mode_mapper.c到安卓终端内
+
+执行 gcc exclusive_mode_mapper[fix_wheel/unfix_wheel].c -o exc;sudo exc /dev/input/event5 "映射脚本文件路径"
+
+摇杆死区太小的游戏使用unfix_wheel,否则使用fix_wheel。
+
+手动编写脚本，或者使用过create_mapper内的工具创建脚本
+
+使用“获取位置.HTML”获取QTscrcpy的脚本是直接输出到剪切板的，粘贴保存到JSON文件，再使用transform.py转换为mapper文件
+
+脚本的编码方式，可参照transform.py文件
+## 注意
+不同的手机型号对应的输入输出event不尽相同，可能需要自行修改event数字
+
+通过getevent能看到自己的键盘鼠标设备号
+
+键盘鼠标插入顺序决定序号
+## To Do
+* ☑ ~~添加读取配置文件功能~~
+* ☑ ~~通过PC或者直接在手机创建配置文件~~ 
+
