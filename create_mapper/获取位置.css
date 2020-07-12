@@ -1,0 +1,39 @@
+.pic{
+    height: 100%;
+    width: 100%;
+    left: 0px;
+    top: 0px;
+}
+.pic img{
+    float: left;
+    width: 100%;
+    left: 0px;
+    top: 0px;
+}
+
+.mask{
+    z-index: 1;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0px;
+    top: 0px;
+}
+
+input{
+    z-index: 999;
+}
+
+.mask button{
+    height: 32px;
+    width: 32px;
+    border: 16px;
+    border-radius: 16px;
+    position: absolute;
+    float: left;
+    color: whitesmoke;
+    background-color: blue;
+}
+
+
+

@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+#include <libgen.h>
 #include "key_define.h"
 
 int touch_fd; //event5 触屏的设备指针
@@ -138,7 +139,7 @@ int first_mouse_touch_id = -1; //鼠标映射的ID 唯一 第一次产生移动�
 int mouse_Start_x = 720;       ///开始结束坐标 只读
 int mouse_Start_y = 1600;      //中途可能有切换 还是会回到这里的
 int realtive_x, realtive_y;    //保存当前移动坐标
-
+int mouse_speedRatio = 1;
 int km_map_id[256 + 16];      //键盘code 对应分配的ID 按下获取 然后存入 释放的时候就从这里获取ID释放
                               //鼠标 鼠标按键还是挺多的 但是似乎编码不友好 所以是手动判断的重新编码的
                               //将其放在了一起 鼠标加偏移量256
@@ -171,8 +172,8 @@ void handel_m_q() //处理鼠标动作
             realtive_y = mouse_Start_y; //相对X,Y
             return;
         }
-        realtive_x -= y;
-        realtive_y += x;
+        realtive_x -= y * mouse_speedRatio;
+        realtive_y += x * mouse_speedRatio;
         if (realtive_x < 100 || realtive_x > 1400 || realtive_y < 100 || realtive_y > 3000)
         {
             mapper(2, first_mouse_touch_id, 0, 0);
@@ -183,7 +184,7 @@ void handel_m_q() //处理鼠标动作
         }
 
         mapper(0, first_mouse_touch_id, realtive_x, realtive_y); //移动
-        printf("[%d,%d]\n", realtive_x, realtive_y);
+        // printf("[%d,%d]\n", realtive_x, realtive_y);
     }
     else if (m_q[0].type == EV_MSC) //点击
     {
@@ -450,17 +451,59 @@ void rset_global()
 
 int main(int argc, char *argv[]) //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
-    map_postion[KEY_SPACE][0] = 438;
-    map_postion[KEY_SPACE][1] = 2932;
+    // map_postion[KEY_SPACE][0] = 438;
+    // map_postion[KEY_SPACE][1] = 2932;
 
-    map_postion[KEY_R][0] = 110;
-    map_postion[KEY_R][1] = 2450;
+    // map_postion[KEY_R][0] = 110;
+    // map_postion[KEY_R][1] = 2450;
 
-    map_postion[256][0] = 703;
-    map_postion[256][1] = 247;
+    // map_postion[256][0] = 703;
+    // map_postion[256][1] = 247;
 
-    map_postion[256 + 1][0] = 594;
-    map_postion[256 + 1][1] = 2753;
+    // map_postion[256 + 1][0] = 594;
+    // map_postion[256 + 1][1] = 2753;
+    char buf[1024 * 8]; //最大8KB
+    // chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
+    // printf("workdir %s\n", argv[0]);
+    printf("reading config from %s...\n", argv[2]);
+    FILE *fp = fopen(argv[2], "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "could not open %s, %s\n", argv[2], strerror(errno));
+        printf("Can't read map file\n");
+        return 1;
+    }
+    fread(buf, 1024 * 8, 1, fp);
+    fclose(fp);
+    int linecount = 0;
+    char lines[68][80]; //总共支持的最长映射为67个
+    char *token = strtok(buf, "\n");
+    while (token != NULL)
+    {
+        strcpy(lines[linecount++], token);
+        token = strtok(NULL, "\n");
+    }
+    int config[68][3];
+    for (int i = 0; i < linecount; i++)
+    {
+        char *rowData = strtok(lines[i], " ");
+        config[i][0] = atoi(rowData);
+        config[i][1] = atoi(strtok(NULL, " "));
+        config[i][2] = atoi(strtok(NULL, " "));
+    }
+    mouse_Start_x = config[0][0];
+    mouse_Start_y = config[0][1];
+    mouse_speedRatio = config[0][2];
+    for (int i = 0; i < 9; i++)
+    {
+        wheel_postion[i][0] = config[i + 1][1];
+        wheel_postion[i][1] = config[i + 1][2];
+    }
+    for (int i = 9; i < linecount; i++)
+    {
+        map_postion[config[i][0]][0] = config[i][1];
+        map_postion[config[i][0]][1] = config[i][2];
+    }
 
     while (1)
     {

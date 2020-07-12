@@ -1,0 +1,148 @@
+{
+    "switchKey": "Key_QuoteLeft",
+    "mouseMoveMap": {
+        "startPos": {
+            "x": 0.57,
+            "y": 0.26
+        },
+        "speedRatio": 10
+    },
+    "keyMapNodes": [
+        {
+            "comment": "9",
+            "type": "KMT_CLICK",
+            "key": "Key_Tab",
+            "pos": {
+                "x": 0.036827195467422094,
+                "y": 0.0541922290388548
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "17",
+            "type": "KMT_CLICK",
+            "key": "Key_Control",
+            "pos": {
+                "x": 0.9079320113314447,
+                "y": 0.9161554192229039
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "32",
+            "type": "KMT_CLICK",
+            "key": "Key_Space",
+            "pos": {
+                "x": 0.9688385269121813,
+                "y": 0.6830265848670757
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "49",
+            "type": "KMT_CLICK",
+            "key": "Key_1",
+            "pos": {
+                "x": 0.5141643059490085,
+                "y": 0.8957055214723927
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "50",
+            "type": "KMT_CLICK",
+            "key": "Key_2",
+            "pos": {
+                "x": 0.5944287063267233,
+                "y": 0.8885480572597138
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "70",
+            "type": "KMT_CLICK",
+            "key": "Key_F",
+            "pos": {
+                "x": 0.7308781869688386,
+                "y": 0.483640081799591
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "71",
+            "type": "KMT_CLICK",
+            "key": "Key_G",
+            "pos": {
+                "x": 0.6940509915014165,
+                "y": 0.9386503067484663
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "77",
+            "type": "KMT_CLICK",
+            "key": "Key_M",
+            "pos": {
+                "x": 0.9117091595845137,
+                "y": 0.14519427402862986
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "81",
+            "type": "KMT_CLICK",
+            "key": "Key_Q",
+            "pos": {
+                "x": 0.9504249291784702,
+                "y": 0.3824130879345603
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "82",
+            "type": "KMT_CLICK",
+            "key": "Key_R",
+            "pos": {
+                "x": 0.7969782813975449,
+                "y": 0.9141104294478528
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "LeftButton",
+            "type": "KMT_CLICK",
+            "key": "LeftButton",
+            "pos": {
+                "x": 0.2049102927289896,
+                "y": 0.11349693251533742
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "RightButton",
+            "type": "KMT_CLICK",
+            "key": "RightButton",
+            "pos": {
+                "x": 0.8838526912181303,
+                "y": 0.5081799591002045
+            },
+            "switchMap": false
+        },
+        {
+            "comment": "WHEEL",
+            "type": "KMT_STEER_WHEEL",
+            "centerPos": {
+                "x": 0.16,
+                "y": 0.75
+            },
+            "leftOffset": 0.1,
+            "rightOffset": 0.1,
+            "upOffset": 0.27,
+            "downOffset": 0.2,
+            "leftKey": "Key_A",
+            "rightKey": "Key_D",
+            "upKey": "Key_W",
+            "downKey": "Key_S"
+        }
+    ]
+}
