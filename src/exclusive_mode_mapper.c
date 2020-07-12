@@ -11,10 +11,27 @@
 #include <string.h>
 #include <errno.h>
 #include <libgen.h>
-#include "key_define.h"
 
-int touch_fd; //event5 触屏的设备指针
+#define keyboard_dev 16
+#define keyboard_device_path "/dev/input/event16"
+#define mouse_dev 15
+#define mouse_device_path "/dev/input/event15"
+#define EV_MSC 0x4       //鼠标按键开头
+#define BTN_MOUSE 0x0110 //左键
+#define BTN_RIGHT 0x0111 //右键
+#define DOWN 0x1
+#define UP 0x0
+#define EV_SYN 0x0
+#define EV_ABS 0x3
+#define EV_KEY 0x1
+#define SYN_REPORT 0x0
+#define ABS_MT_SLOT 0x2F
+#define ABS_MT_TRACKING_ID 0x39
+#define ABS_MT_POSITION_X 0x35
+#define ABS_MT_POSITION_Y 0x36
+#define BTN_TOUCH 0x14A
 
+int touch_fd;                   //event5 触屏的设备指针
 int Exclusive_mode_flag = 0;    //独占模式标识
 int no_Exclusive_mode_flag = 1; //刚开始 进入非独占模式
 struct input_event m_q[16];     //鼠标信号队列
@@ -339,7 +356,7 @@ int Exclusive_mode(char *argv[])
 
     int rcode = 0;
     char keyboard_name[256] = "Unknown";
-    int keyboard_fd = open("/dev/input/event16", O_RDONLY | O_NONBLOCK);
+    int keyboard_fd = open(keyboard_device_path, O_RDONLY | O_NONBLOCK);
     if (keyboard_fd == -1)
     {
         printf("Failed to open keyboard.\n");
@@ -353,7 +370,7 @@ int Exclusive_mode(char *argv[])
     struct input_event keyboard_event;
 
     char mouse_name[256] = "Unknown";
-    int mouse_fd = open("/dev/input/event15", O_RDONLY | O_NONBLOCK);
+    int mouse_fd = open(mouse_device_path, O_RDONLY | O_NONBLOCK);
     if (mouse_fd == -1)
     {
         printf("Failed to open mouse.\n");
@@ -412,7 +429,7 @@ int no_Exclusive_mode()
 
     int rcode = 0;
     char keyboard_name[256] = "Unknown";
-    int keyboard_fd = open("/dev/input/event16", O_RDONLY | O_NONBLOCK);
+    int keyboard_fd = open(keyboard_device_path, O_RDONLY | O_NONBLOCK);
     if (keyboard_fd == -1)
     {
         printf("Failed to open keyboard.\n");
@@ -451,20 +468,9 @@ void rset_global()
 
 int main(int argc, char *argv[]) //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
-    // map_postion[KEY_SPACE][0] = 438;
-    // map_postion[KEY_SPACE][1] = 2932;
 
-    // map_postion[KEY_R][0] = 110;
-    // map_postion[KEY_R][1] = 2450;
-
-    // map_postion[256][0] = 703;
-    // map_postion[256][1] = 247;
-
-    // map_postion[256 + 1][0] = 594;
-    // map_postion[256 + 1][1] = 2753;
-    char buf[1024 * 8]; //最大8KB
-    // chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
-    // printf("workdir %s\n", argv[0]);
+    char buf[1024 * 8];      //配置文件大小最大8KB
+    chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
     printf("reading config from %s...\n", argv[2]);
     FILE *fp = fopen(argv[2], "r");
     if (fp == NULL)
@@ -476,7 +482,7 @@ int main(int argc, char *argv[]) //首先是非独占模式 由`键启动进入�
     fread(buf, 1024 * 8, 1, fp);
     fclose(fp);
     int linecount = 0;
-    char lines[68][80]; //总共支持的最长映射为67个
+    char lines[68][64]; //总共支持的最长映射为67个
     char *token = strtok(buf, "\n");
     while (token != NULL)
     {
