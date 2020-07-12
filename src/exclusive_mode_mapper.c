@@ -86,7 +86,7 @@ int main_controler(int type, int unclear_id, int x, int y)
     up.value = 0x0;
 
     int id = unclear_id;
-    if (type == 0) //移动:  切换ID,X,Y,同步 编码格式 "2 id x y"
+    if (type == 0) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
     {
         set_id.value = id;
         pos_x.value = x;
@@ -96,8 +96,9 @@ int main_controler(int type, int unclear_id, int x, int y)
         write(touch_fd, &pos_y, sizeof(pos_y));
         write(touch_fd, &sync, sizeof(sync));
     }
-    else if (type == 2) //释放: 切换ID,uid=-1,同步 编码格式 "1 id"
+    else if (type == 2) //释放: 切换ID,uid=-1,同步 编码格式 "2 id 0 0"
     {
+        if(id ==-1) return -1;//没申请成功的释放请求
         touch_id[id] = 0;  // 释放
         allocatedID_num--; //占用数目-1
         set_id.value = id;
@@ -109,7 +110,7 @@ int main_controler(int type, int unclear_id, int x, int y)
         write(touch_fd, &sync, sizeof(sync));
     }
     else if (type == 1)
-    {                 //type == pressTouch  按下： 切换ID，uid=自定义，x，y，同步 编码格式 "0 id x y"
+    {                 //type == pressTouch  按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 -1 x y"
         if (id == -1) //申请触摸 是一个新的触摸点 或者申请没有成功 理论上是继续拒绝
         {
             for (int i = 0; i < 10; i++)
