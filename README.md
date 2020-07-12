@@ -13,11 +13,14 @@
 > ### 需要ROOT权限
 # 使用方法
 > ### 拷贝exclusive_mode_mapper.c到安卓终端内
-> ### 执行 gcc exclusive_mode_mapper.c -o exc;sudo exc /dev/input/event5
+> ### 执行 gcc exclusive_mode_mapper.c -o exc;sudo exc /dev/input/event5 "映射脚本文件路径"
+> ### 手动编写脚本，或者使用过create_mapper内的工具创建脚本
+> ### 使用“获取位置.HTML”获取QTscrcpy的脚本是直接输出到剪切板的，粘贴保存到JSON文件，再使用transform.py转换为mapper文件
+> ### 脚本的编码方式，可参照transform.py文件
 # 注意
 > ### 不同的手机型号对应的输入输出event不尽相同，可能需要自行修改event数字
 > ### 通过getevent能看到自己的键盘鼠标设备号
 > ### 键盘鼠标插入顺序决定序号
 # To Do
-> * ### 添加读取配置文件功能
-> * ### 通过PC或者直接在手机创建配置文件
+> * ### ☑ ~~添加读取配置文件功能~~
+> * ### ☑ ~~通过PC或者直接在手机创建配置文件~~ 
