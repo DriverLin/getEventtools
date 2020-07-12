@@ -1,6 +1,5 @@
 # Exclusive_mode_mapper
 ## 在系统底层实现鼠标键盘映射触屏
-## PS: 没ROOT可以不看了
 # 说明
 > ### 安卓的底层Linux通过/dev/input/eventX来实现对输入输出设备的管理
 > ### root后可以直接对字符设备进行读写
@@ -13,7 +12,8 @@
 > ### 需要ROOT权限
 # 使用方法
 > ### 拷贝exclusive_mode_mapper.c到安卓终端内
-> ### 执行 gcc exclusive_mode_mapper.c -o exc;sudo exc /dev/input/event5 "映射脚本文件路径"
+> ### 执行 gcc exclusive_mode_mapper[fix_wheel/unfix_wheel].c -o exc;sudo exc /dev/input/event5 "映射脚本文件路径"
+> ### 摇杆死区太小的游戏使用unfix_wheel,否则使用fix_wheel。
 > ### 手动编写脚本，或者使用过create_mapper内的工具创建脚本
 > ### 使用“获取位置.HTML”获取QTscrcpy的脚本是直接输出到剪切板的，粘贴保存到JSON文件，再使用transform.py转换为mapper文件
 > ### 脚本的编码方式，可参照transform.py文件
