@@ -1,75 +1,349 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
+<html lang="en">
+
+<head>
     <meta charset="UTF-8">
-    <title>Exclusive mode mapper by DriverLin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Exclusive mode mapper</h1>
-      <h2 class="project-tagline">极低延迟的键鼠映射触屏工具</h2>
-      <a href="https://github.com/DriverLin/Exclusive_mode_mapper" class="btn">View on GitHub</a>
-      <a href="https://github.com/DriverLin/Exclusive_mode_mapper/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/DriverLin/Exclusive_mode_mapper/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+    <link href=https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var dowing = false
+        var dowKey
+        var list = {}
+        var jskmap = {
+            8: "Key_Backspace",
+            9: "Key_Tab",
+            12: "Key_Clear",
+            13: "Key_Enter",
+            16: "Key_Shift",
+            17: "Key_Control",
+            18: "Key_Alt",
+            19: "Key_Pause",
+            20: "Key_CapsLock",
+            27: "Key_Escape",
+            32: "Key_Space",
+            34: "Key_MediaNext",
+            35: "Key_Hangul_End",
+            36: "Key_Home",
+            37: "Key_Left",
+            38: "Key_Up",
+            39: "Key_Right",
+            40: "Key_Down",
+            41: "Key_Select",
+            42: "Key_Print",
+            43: "Key_Execute",
+            45: "Key_Insert",
+            46: "Key_Delete",
+            47: "Key_Help",
+            48: "Key_0",
+            49: "Key_1",
+            50: "Key_2",
+            51: "Key_3",
+            52: "Key_4",
+            53: "Key_5",
+            54: "Key_6",
+            55: "Key_7",
+            56: "Key_8",
+            57: "Key_9",
+            96: "Key_0",
+            97: "Key_1",
+            98: "Key_2",
+            99: "Key_3",
+            100: "Key_4",
+            101: "Key_5",
+            102: "Key_6",
+            103: "Key_7",
+            104: "Key_8",
+            105: "Key_9",
+            65: "Key_A",
+            66: "Key_B",
+            67: "Key_C",
+            68: "Key_D",
+            69: "Key_E",
+            70: "Key_F",
+            71: "Key_G",
+            72: "Key_H",
+            73: "Key_I",
+            74: "Key_J",
+            75: "Key_K",
+            76: "Key_L",
+            77: "Key_M",
+            78: "Key_N",
+            79: "Key_O",
+            80: "Key_P",
+            81: "Key_Q",
+            82: "Key_R",
+            83: "Key_S",
+            84: "Key_T",
+            85: "Key_U",
+            86: "Key_V",
+            87: "Key_W",
+            88: "Key_X",
+            89: "Key_Y",
+            90: "Key_Z",
+            136: "Key_NumLock",
+            137: "Key_ScrollLock"
+        }
+        var linuxKmap = {
+            "Key_Backspace": 14,
+            "Key_Tab": 15,
+            "Key_Clear": 0,
+            "Key_Enter": 28,
+            "Key_Shift": 42,
+            "Key_Control": 29,
+            "Key_Alt": 56,
+            "Key_Pause": 119,
+            "Key_CapsLock": 58,
+            "Key_Escape": 1,
+            "Key_Space": 57,
+            "Key_Home": 102,
+            "Key_Left": 105,
+            "Key_Up": 103,
+            "Key_Right": 106,
+            "Key_Down": 108,
+            "Key_Print": 210,
+            "Key_Insert": 110,
+            "Key_Delete": 111,
+            "Key_0": 11,
+            "Key_1": 2,
+            "Key_2": 3,
+            "Key_3": 4,
+            "Key_4": 5,
+            "Key_5": 6,
+            "Key_6": 7,
+            "Key_7": 8,
+            "Key_8": 9,
+            "Key_9": 10,
+            "Key_A": 30,
+            "Key_B": 48,
+            "Key_C": 46,
+            "Key_D": 32,
+            "Key_E": 18,
+            "Key_F": 33,
+            "Key_G": 34,
+            "Key_H": 35,
+            "Key_I": 23,
+            "Key_J": 36,
+            "Key_K": 37,
+            "Key_L": 38,
+            "Key_M": 50,
+            "Key_N": 49,
+            "Key_O": 24,
+            "Key_P": 25,
+            "Key_Q": 16,
+            "Key_R": 19,
+            "Key_S": 31,
+            "Key_T": 20,
+            "Key_U": 22,
+            "Key_V": 47,
+            "Key_W": 17,
+            "Key_X": 45,
+            "Key_Y": 21,
+            "Key_Z": 44,
+            "Key_NumLock": 69,
+            "Key_ScrollLock": 70,
+            "LeftButton": 256,
+            "RightButton": 257  // 自定义左右键
+        }
+        function getNaturalWidth(img) {
+            var image = new Image()
+            image.src = img.src
+            var naturalWidth = image.width
+            return naturalWidth
+        }
+        function getNaturalHeight(img) {
+            var image = new Image()
+            image.src = img.src
+            var naturalWidth = image.height
+            return naturalWidth
+        }
+        function getMapper() {
+            var text = ""
+            const target = document.getElementById('img')
+            var Y = getNaturalWidth(target)
+            var X = getNaturalHeight(target)
+            console.log(Y, X)
+            var kw = list[87]//确定长度
+            var ks = list[83]//确定原点
+            var relative = 100
+            if (kw != undefined && ks != undefined) {
+                relative = Math.sqrt(Math.pow(kw.x * X - ks.x * X, 2) + Math.pow(kw.y * Y - ks.y * Y, 2))
+            }
+            var wheelx = 600;
+            var wheely = 600;
+            if (ks != undefined) {
+                wheelx = ks.x * X
+                wheely = ks.y * Y
+            }
+            if (relative > wheelx) {
+                relative = wheelx - 10
+            }
+            console.log("::", parseInt(wheelx), parseInt(wheely), parseInt(relative))
+            text += parseInt(X / 2) + " " + parseInt(Y / 2 + 10) + " 1\n"
+            text += "0 " + parseInt(X - relative) + " " + parseInt(Y - relative) + " \n";
+            text += "1 " + parseInt(X) + " " + parseInt(Y - relative) + " \n";
+            text += "2 " + parseInt(X + relative) + " " + parseInt(Y - relative) + " \n";
+            text += "3 " + parseInt(X - relative) + " " + parseInt(Y) + " \n";
+            text += "4 " + parseInt(X) + " " + parseInt(Y) + " \n";
+            text += "5 " + parseInt(X + relative) + " " + parseInt(Y) + " \n";
+            text += "6 " + parseInt(X - relative) + " " + parseInt(Y + relative) + " \n";
+            text += "7 " + parseInt(X) + " " + parseInt(Y + relative) + " \n";
+            text += "8 " + parseInt(X + relative) + " " + parseInt(Y + relative) + " \n";
 
-    <section class="main-content">
-      <h1>
-<a id="exclusive_mode_mapper" class="anchor" href="#exclusive_mode_mapper" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Exclusive_mode_mapper</h1>
-<p>在系统底层实现鼠标键盘映射触屏</p>
-<h2>
-<a id="说明" class="anchor" href="#%E8%AF%B4%E6%98%8E" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>说明</h2>
-<p>安卓的底层Linux通过/dev/input/eventX来实现对输入输出设备的管</p>
-<p>root后可以直接对字符设备进行读写</p>
-<p>程序工作时使用独占模式，读取键盘鼠标的输入，通过写设备文件映射操作到触屏</p>
-<p>使用~键在键鼠正常使用和程序独占映射模式之间切换</p>
-<h2>
-<a id="优点" class="anchor" href="#%E4%BC%98%E7%82%B9" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>优点</h2>
-<p>在Linux底层完成映射，延迟级低。</p>
-<p>不运行安卓程序，无法被检测。</p>
-<h2>
-<a id="缺点" class="anchor" href="#%E7%BC%BA%E7%82%B9" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>缺点</h2>
-<p>需要ROOT权限</p>
-<h2>
-<a id="使用方法" class="anchor" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>使用方法</h2>
-<p>下载</p>
-<pre><code>wget https://raw.githubusercontent.com/DriverLin/Exclusive_mode_mapper/master/src/mapper.c
-</code></pre>
-<p>编译</p>
-<pre><code>gcc mapper.c -o mapper
-</code></pre>
-<p>查看自己的触屏，鼠标和，键盘对应的设备号</p>
-<p>获取脚本文件</p>
-<p>执行</p>
-<pre><code>sudo ./mapper 触屏设备号 鼠标设备号 键盘设备号 映射文件路径
-</code></pre>
-<p>例如</p>
-<pre><code>$ sudo ./mapper 5 15 16 ./hpjy_br.mapper
-touch_dev_path:/dev/input/event5
-mouse_dev_path:/dev/input/event15
-keyboard_dev_path:/dev/input/event16
-reading config from ./hpjy_br.mapper...
-Reading From : HID 046a:0011
-</code></pre>
-<h2>
-<a id="关于脚本" class="anchor" href="#%E5%85%B3%E4%BA%8E%E8%84%9A%E6%9C%AC" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>关于脚本</h2>
-<p>截图保存 create_mapper/sc.jpg</p>
-<p>使用create_mapper/getMapper.html创建JSON格式</p>
-<p>使用transform脚本转换为mapper格式</p>
+            for (var k in list) {
+                var kname = jskmap[k];
+                var py = parseInt(list[k].x * Y);
+                var px = parseInt((1 - list[k].y) * X);
+                if (k == 9) {//8 9 0  左中右
+                    text += 257 + " " + px + " " + py + "\n"
+                } else if (k == 10) {
+                    text += 256 + " " + px + " " + py + "\n"
+                } else if (k == 11) {
+                    text += 258 + " " + px + " " + py + "\n"
+                }
+                else if (k == 87 || k == 83) {//ws用来确定左摇杆了
+                }
+                else if (kname in linuxKmap) {
+                    text += linuxKmap[kname] + " " + px + " " + py + "\n"
+                }
+            }
+            console.log(text)
+            console.log(list)
+            $('body').append(`<textarea type="text" id="copy"></input>`)
+            document.getElementById('copy').value = text;
+            $('#copy').select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+            $('#copy').remove();
+        }
+        document.onclick = function (event) {
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/DriverLin/Exclusive_mode_mapper">Exclusive mode mapper</a> is maintained by <a href="https://github.com/DriverLin">DriverLin</a>.</span>
+            if (dowing) {
+                const target = document.getElementById('img')
+                var x = event.offsetX / target.offsetWidth
+                var y = event.offsetY / target.offsetHeight
+                console.log(dowKey)
+                console.log(x, y)
+                var km = {
+                    'key': jskmap[dowKey],
+                    'x': x,
+                    'y': y
+                }
+                list[dowKey] = km;
+                $('.mask').empty()
+                var Arrary = []
+                for (var key in list) {
+                    var value = list[key];
+                    Arrary.push(value)
+                    $('.mask').append(`
+                <button class="button" style="top:${target.offsetHeight * value.y - 16}px;left:${target.offsetWidth * value.x - 16}px;">${value.key}</button>
+                `)
+                }
+                getMapper()
+            }
+        }
+        document.onkeydown = function (event) {
+            dowing = true
+            dowKey = event.keyCode
+        }
+        document.onkeyup = function (event) {
+            dowing = false
+        }
+        document.oncontextmenu = function (e) {
+            e.preventDefault();
+        };
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
+        function changepic() {
+            var reads = new FileReader();
+            f = document.getElementById('fileInput').files[0];
+            reads.readAsDataURL(f);
+            reads.onload = function (e) {
+                document.getElementById('img').src = this.result;
+            };
+            document.getElementById('mainContainer').hidden = false;
+            document.getElementById('uploadBtn').hidden = true;
+        }
+        function uploadImg() {
+            document.getElementById('fileInput').click();
+        }
+    </script>
+    <style type="text/css">
+        body {
+            background: #00796B;
+        }
 
-    </section>
+        .pic {
+            height: 100%;
+            width: 100%;
+            left: 0px;
+            top: 0px;
+        }
 
-  
-  </body>
+        .pic img {
+            float: left;
+            width: 100%;
+            left: 0px;
+            top: 0px;
+        }
+
+        .mask {
+            z-index: 1;
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            left: 0px;
+            top: 0px;
+        }
+
+        .mask button {
+            height: 32px;
+            width: 32px;
+            border: 16px;
+            border-radius: 16px;
+            position: absolute;
+            float: left;
+            color: whitesmoke;
+            background-color: blue;
+        }
+
+        #uploadBtn {
+            position: absolute;
+            width: 200px;
+            height: 80px;
+            left: 50%;
+            margin-left: -105px;
+            top: 50%;
+            border-radius: 50px;
+            border: 5px solid #00b894;
+            transition: .25s;
+            font-size: 24px;
+            background: #2C3A47;
+            color: white;
+        }
+
+        #uploadBtn:hover {
+            background: #00b894;
+            outline: none;
+        }
+
+        #uploadBtn:focus {
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <input id="fileInput" type="file" style="display:none" accept="image/*" onchange="changepic(this)"></input>
+    <button id="uploadBtn" onclick="uploadImg()">上传截图</button>
+    <div id="mainContainer" hidden="true">
+        <div class="pic">
+            <img id="img" src="./sc.jpg">
+        </div>
+        <div class="mask">
+        </div>
+    </div>
+</body>
+
 </html>
