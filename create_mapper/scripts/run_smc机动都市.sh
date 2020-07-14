@@ -1,1 +1,0 @@
-sudo ./unfix_wheel /dev/input/event5 /data/data/com.termux/files/home/smc.mapper

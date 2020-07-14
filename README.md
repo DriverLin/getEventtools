@@ -16,16 +16,24 @@ root后可以直接对字符设备进行读写
 ## 缺点
 需要ROOT权限
 ## 使用方法
-sudo getevent查看自己的触屏，鼠标和，键盘对应的设备号
 
-下载mapper.c
+下载
+```
+wget https://raw.githubusercontent.com/DriverLin/Exclusive_mode_mapper/master/src/mapper.c
+```
+编译
+```
+gcc mapper.c -o mapper
+```
+查看自己的触屏，鼠标和，键盘对应的设备号
 
-编译gcc mapper.c -o mapper
+获取脚本文件
 
-执行sudo ./mapper 触屏设备号 鼠标设备号 键盘设备号 映射文件路径
-
-示例
-
+执行
+```
+sudo ./mapper 触屏设备号 鼠标设备号 键盘设备号 映射文件路径
+```
+例如
 ``` 
 $ sudo ./mapper 5 15 16 ./hpjy_br.mapper
 touch_dev_path:/dev/input/event5
@@ -35,9 +43,11 @@ reading config from ./hpjy_br.mapper...
 Reading From : HID 046a:0011
 ```
 
+## 关于脚本
+截图保存 create_mapper/sc.jpg
 
-使用“获取位置.HTML”获取QTscrcpy的脚本是直接输出到剪切板的，粘贴保存到JSON文件，再使用transform.py转换为mapper文件
+使用create_mapper/getMapper.html创建JSON格式
 
-脚本的编码方式，可参照transform.py文件
+使用transform脚本转换为mapper格式
 
 
