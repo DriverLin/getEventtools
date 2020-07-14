@@ -16,6 +16,10 @@ root后可以直接对字符设备进行读写
 ## 缺点
 需要ROOT权限
 ## 使用方法
+查看自己的触屏，鼠标和，键盘对应的设备号
+```
+sudo getevent -l
+```
 
 下载
 ```
@@ -25,9 +29,13 @@ wget https://raw.githubusercontent.com/DriverLin/Exclusive_mode_mapper/master/sr
 ```
 gcc mapper.c -o mapper
 ```
-查看自己的触屏，鼠标和，键盘对应的设备号
+
 
 获取脚本文件
+```
+[mapperTool](https://driverlin.github.io/Exclusive_mode_mapper/)
+
+```
 
 执行
 ```
@@ -44,10 +52,11 @@ Reading From : HID 046a:0011
 ```
 
 ## 关于脚本
-截图保存 create_mapper/sc.jpg
+按住按键点击对应位置即可生成并自动复制到剪贴板
 
-使用create_mapper/getMapper.html创建JSON格式
+数字键8,9,0对应鼠标左中右
 
-使用transform脚本转换为mapper格式
+S用于定位摇杆中心
 
+W用于限制摇杆范围
 
