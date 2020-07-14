@@ -14,16 +14,16 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#define keyboard_dev 16
-#define keyboard_device_path "/dev/input/event16"
-#define mouse_dev 15
-#define mouse_device_path "/dev/input/event15"
 #define DOWN 0x1
 #define UP 0x0
 #define ABS_MT_TRACKING_ID 0x39
 #define ABS_MT_POSITION_X 0x35
 #define ABS_MT_POSITION_Y 0x36
-
+char touch_dev_path[80];
+char keyboard_dev_path[80];
+char mouse_dev_path[80];
+int keyboard_dev = 16;
+int mouse_dev = 15;
 int touch_fd;                   //event5 触屏的设备指针
 int Exclusive_mode_flag = 0;    //独占模式标识
 int no_Exclusive_mode_flag = 1; //刚开始 进入非独占模式
@@ -362,14 +362,14 @@ void handelEvent(int flag, struct input_event receive_event) //是按照插入�
         return;
 }
 
-int Exclusive_mode(char *argv[])
+int Exclusive_mode()
 {
-    touch_fd = open(argv[1], O_RDWR); //触摸设备
+    touch_fd = open(touch_dev_path, O_RDWR); //触摸设备号
     for (int i = 0; i < 4; i++)
         wheel_satuse[i] = 0; //清除方向盘状态
     if (touch_fd < 0)
     {
-        fprintf(stderr, "could not open %s, %s\n", argv[optind], strerror(errno));
+        fprintf(stderr, "could not open touchScreen\n");
         int tmp = Exclusive_mode_flag;
         Exclusive_mode_flag = no_Exclusive_mode_flag;
         no_Exclusive_mode_flag = tmp; //切换回非独占
@@ -378,7 +378,7 @@ int Exclusive_mode(char *argv[])
 
     int rcode = 0;
     char keyboard_name[256] = "Unknown";
-    int keyboard_fd = open(keyboard_device_path, O_RDONLY | O_NONBLOCK);
+    int keyboard_fd = open(keyboard_dev_path, O_RDONLY | O_NONBLOCK);
     if (keyboard_fd == -1)
     {
         printf("Failed to open keyboard.\n");
@@ -392,7 +392,7 @@ int Exclusive_mode(char *argv[])
     struct input_event keyboard_event;
 
     char mouse_name[256] = "Unknown";
-    int mouse_fd = open(mouse_device_path, O_RDONLY | O_NONBLOCK);
+    int mouse_fd = open(mouse_dev_path, O_RDONLY | O_NONBLOCK);
     if (mouse_fd == -1)
     {
         printf("Failed to open mouse.\n");
@@ -439,7 +439,7 @@ int no_Exclusive_mode()
 
     int rcode = 0;
     char keyboard_name[256] = "Unknown";
-    int keyboard_fd = open(keyboard_device_path, O_RDONLY | O_NONBLOCK);
+    int keyboard_fd = open(keyboard_dev_path, O_RDONLY | O_NONBLOCK);
     if (keyboard_fd == -1)
     {
         printf("Failed to open keyboard.\n");
@@ -456,9 +456,20 @@ int no_Exclusive_mode()
     return 0;
 }
 
-int main(int argc, char *argv[]) //触屏设备路径 mapper映射文件路径
+int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备号 mapper映射文件路径
                                  //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
+    int touch_dev_num = atoi(argv[1]);
+    int mouse_dev_num = atoi(argv[2]);
+    int keyboard_dev_num = atoi(argv[3]);
+    mouse_dev = mouse_dev_num;
+    keyboard_dev = keyboard_dev_num;
+    sprintf(touch_dev_path, "/dev/input/event%d", touch_dev_num);
+    sprintf(mouse_dev_path, "/dev/input/event%d", mouse_dev_num);
+    sprintf(keyboard_dev_path, "/dev/input/event%d", keyboard_dev_num);
+    printf("touch_dev_path:%s\n", touch_dev_path);
+    printf("mouse_dev_path:%s\n", mouse_dev_path);
+    printf("keyboard_dev_path:%s\n", keyboard_dev_path);
     if (sem_init(&sem_control, 0, 1) != 0)
     {
         perror("fail to sem_sem_control init");
@@ -466,11 +477,11 @@ int main(int argc, char *argv[]) //触屏设备路径 mapper映射文件路径
     }
     char buf[1024 * 8];      //配置文件大小最大8KB
     chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
-    printf("reading config from %s...\n", argv[2]);
-    FILE *fp = fopen(argv[2], "r");
+    printf("reading config from %s...\n", argv[4]);
+    FILE *fp = fopen(argv[4], "r");
     if (fp == NULL)
     {
-        fprintf(stderr, "Can't read map file from %s, %s\n", argv[2], strerror(errno));
+        fprintf(stderr, "Can't read map file from %s, %s\n", argv[4], strerror(errno));
         exit(-2);
     }
     fread(buf, 1024 * 8, 1, fp);
@@ -508,6 +519,6 @@ int main(int argc, char *argv[]) //触屏设备路径 mapper映射文件路径
     while (1)
     {
         no_Exclusive_mode();
-        Exclusive_mode(argv); //记得先插鼠标 再插键盘
+        Exclusive_mode(); //记得先插鼠标 再插键盘
     }
 }
