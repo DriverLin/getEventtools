@@ -1,0 +1,8 @@
+title: Exclusive mode mapper
+description: 极低延迟的键鼠映射触屏工具
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
