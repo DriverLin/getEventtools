@@ -145,8 +145,15 @@
             "Key_Z": 44,
             "Key_NumLock": 69,
             "Key_ScrollLock": 70,
-            "LeftButton": 256,
-            "RightButton": 257  // 自定义左右键
+            "BTN_MOUSE": 256,
+            "BTN_LEFT": 256,
+            "BTN_RIGHT": 257,
+            "BTN_MIDDLE": 258,
+            "BTN_SIDE": 259,
+            "BTN_EXTRA": 260,
+            "BTN_FORWARD": 261,
+            "BTN_BACK": 262,
+            "BTN_TASK": 263
         }
         function getNaturalWidth(img) {
             var image = new Image()
@@ -168,43 +175,42 @@
             console.log(Y, X)
             var kw = list[87]//确定长度
             var ks = list[83]//确定原点
-            var relative = 100
+            var relative = 300
             if (kw != undefined && ks != undefined) {
                 relative = Math.sqrt(Math.pow(kw.x * X - ks.x * X, 2) + Math.pow(kw.y * Y - ks.y * Y, 2))
             }
-            var wheelx = 600;
-            var wheely = 600;
+            var wheel_start_x = 600;
+            var wheely_start_y = 600;
             if (ks != undefined) {
-                wheelx = ks.x * X
-                wheely = ks.y * Y
+                wheel_start_x = (1 - ks.y) * X
+                wheely_start_y = ks.x * Y
             }
-            if (relative > wheelx) {
-                relative = wheelx - 10
+            if (relative > wheel_start_x) {
+                relative = wheel_start_x - 10
             }
-            console.log("::", parseInt(wheelx), parseInt(wheely), parseInt(relative))
+            console.log("x:" + parseInt(wheel_start_x), "   y:" + parseInt(wheely_start_y), "   len:" + parseInt(relative))
             text += parseInt(X / 2) + " " + parseInt(Y / 2 + 10) + " 1\n"
-            text += "0 " + parseInt(X - relative) + " " + parseInt(Y - relative) + " \n";
-            text += "1 " + parseInt(X) + " " + parseInt(Y - relative) + " \n";
-            text += "2 " + parseInt(X + relative) + " " + parseInt(Y - relative) + " \n";
-            text += "3 " + parseInt(X - relative) + " " + parseInt(Y) + " \n";
-            text += "4 " + parseInt(X) + " " + parseInt(Y) + " \n";
-            text += "5 " + parseInt(X + relative) + " " + parseInt(Y) + " \n";
-            text += "6 " + parseInt(X - relative) + " " + parseInt(Y + relative) + " \n";
-            text += "7 " + parseInt(X) + " " + parseInt(Y + relative) + " \n";
-            text += "8 " + parseInt(X + relative) + " " + parseInt(Y + relative) + " \n";
+            var wheelNumCount = 0;
+            for (var posY of [parseInt(wheely_start_y - relative), parseInt(wheely_start_y), parseInt(wheely_start_y + relative)]) {
+                for (var posX of [parseInt(wheel_start_x - relative), parseInt(wheel_start_x), parseInt(wheel_start_x + relative)]) {
+                    text += wheelNumCount + " " + posX + " " + posY + "\n";
+                    wheelNumCount++
+                }
+            }
 
             for (var k in list) {
                 var kname = jskmap[k];
                 var py = parseInt(list[k].x * Y);
                 var px = parseInt((1 - list[k].y) * X);
-                if (k == 9) {//8 9 0  左中右
-                    text += 257 + " " + px + " " + py + "\n"
-                } else if (k == 10) {
-                    text += 256 + " " + px + " " + py + "\n"
-                } else if (k == 11) {
-                    text += 258 + " " + px + " " + py + "\n"
+                if (kname == "Key_8") {
+                    text += linuxKmap["BTN_LEFT"] + " " + px + " " + py + "\n"
+                } else if (kname == "Key_9") {
+                    text += linuxKmap["BTN_MIDDLE"] + " " + px + " " + py + "\n"
+                } else if (kname == "Key_0") {
+                    text += linuxKmap["BTN_RIGHT"] + " " + px + " " + py + "\n"
                 }
-                else if (k == 87 || k == 83) {//ws用来确定左摇杆了
+                else if (kname == "Key_W" || kname == "Key_A" || kname == "Key_S" || kname == "Key_D") {//ws用来确定左摇杆了
+                    console.log("pass\n");
                 }
                 else if (kname in linuxKmap) {
                     text += linuxKmap[kname] + " " + px + " " + py + "\n"
@@ -339,7 +345,7 @@
     <button id="uploadBtn" onclick="uploadImg()">上传截图</button>
     <div id="mainContainer" hidden="true">
         <div class="pic">
-            <img id="img" src="./sc.jpg">
+            <img id="img" src="">
         </div>
         <div class="mask">
         </div>
