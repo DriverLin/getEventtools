@@ -1,0 +1,397 @@
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   0000b4e0
+/dev/input/event5: EV_KEY       BTN_TOUCH            DOWN
+/dev/input/event5: EV_ABS       ABS_MT_WIDTH_MAJOR   0000000a
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002ab
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006a6
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_KEY       BTN_TOUCH            UP
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   0000b4e1
+/dev/input/event5: EV_KEY       BTN_TOUCH            DOWN
+/dev/input/event5: EV_ABS       ABS_MT_WIDTH_MAJOR   00000007
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002da
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005c0
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005d4
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005f0
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002dd
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000614
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002df
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000636
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002e1
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000657
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002e2
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000678
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002e3
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000069a
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002e5
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006bc
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002fb
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000089b
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000008ac
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002fa
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000008bd
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_KEY       BTN_TOUCH            UP
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   0000b4f8
+/dev/input/event5: EV_KEY       BTN_TOUCH            DOWN
+/dev/input/event5: EV_ABS       ABS_MT_WIDTH_MAJOR   00000009
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003e5
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000065e
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   0000b4f9
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000001a1
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006a7
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003e3
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000668
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003e0
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000674
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003dc
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000680
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000001a0
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006b0
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003d8
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000068b
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000019e
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006bc
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003d5
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000698
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_WIDTH_MAJOR   00000008
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000019b
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006c9
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003d2
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006a5
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000199
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006d7
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003cf
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006b1
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000196
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006e6
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003cc
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006bc
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000193
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006f5
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003c8
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006c6
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000191
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000704
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003c4
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006ce
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000018f
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000711
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003c2
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006d3
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000018d
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000071e
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003c0
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006d7
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000018c
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000725
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003bf
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006d9
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000018b
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000729
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003bd
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006da
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000018a
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000072c
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003bc
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006dc
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000072e
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000189
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000072f
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000730
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003bd
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000006db
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003be
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_KEY       BTN_TOUCH            UP
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+
+
+
+
+
+
+
+
+
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   000000e2
+/dev/input/event5: EV_KEY       BTN_TOUCH            DOWN
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000490
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000004b0
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000486
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000004ad
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   000000e3
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002ed
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000646
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000003a4
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000044e
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000039c
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000044a
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000393
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000447
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000038b
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000443
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000383
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000440
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000367
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000432
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002e6
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000643
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000361
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000042f
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002de
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000641
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000035b
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000042c
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002d6
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000063d
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000356
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000427
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002ce
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000063a
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000350
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000423
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002c5
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000636
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000349
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000041e
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002bd
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000633
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000342
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000419
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002b3
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    0000062e
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000033b
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000414
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    000002a8
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000628
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000334
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000410
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000029c
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    00000622
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000000
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000300
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_SLOT          00000001
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000221
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005e4
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    00000222
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005e5
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_X    0000021d
+/dev/input/event5: EV_ABS       ABS_MT_POSITION_Y    000005e4
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+/dev/input/event5: EV_ABS       ABS_MT_TRACKING_ID   ffffffff
+/dev/input/event5: EV_KEY       BTN_TOUCH            UP
+/dev/input/event5: EV_SYN       SYN_REPORT           00000000
+
+
+
+有一个按下 down
+
+ABS_MT_SLOT   是切换ID，一组之前没有这条指令 后面执行的所有动作 都默认是上一条这个指令指出的触摸ID
+处理事务
+同步
+
+全部完成后 up
+
+创建触摸点 ：
+ABS_MT_SLOT切换到一个没有使用的ID，
+ABS_MT_TRACKING_ID 声明一个唯一ID，非-1
+X,Y坐标
+同步
+
+销毁触摸点：
+ABS_MT_SLOT切换到要销毁的ID
+ABS_MT_TRACKING_ID 声明的唯一ID置-1
+同步
+
+移动：
+ABS_MT_SLOT 切换到要进行移动的ID
+X,Y坐标
+同步
+
