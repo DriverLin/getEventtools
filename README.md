@@ -30,10 +30,7 @@ wget https://raw.githubusercontent.com/DriverLin/Exclusive_mode_mapper/master/sr
 gcc mapper.c -o mapper
 ```
 
-
-获取脚本文件
-
-https://driverlin.github.io/Exclusive_mode_mapper/
+[创建脚本文件](https://driverlin.github.io/Exclusive_mode_mapper/)
 
 执行
 ```
