@@ -11,7 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <libgen.h>
-
+#include <semaphore.h>
 #define keyboard_dev 16
 #define keyboard_device_path "/dev/input/event16"
 #define mouse_dev 15
@@ -46,10 +46,12 @@ struct input_event btn_up = {0, EV_KEY, BTN_TOUCH, DOWN};    //释放 触摸点�
 //超出10点个不响应
 //返回触摸点的ID 下次带上
 //鼠标的映射 鼠标一开始就占一个 切换后才释放 是申请还是移动 在外边判断
-int mapper(int type, int unclear_id, int x, int y)
+//由于多线程 保证安全加上PV
+sem_t sem_control;
+int main_controler(int type, int unclear_id, int x, int y)
 {
     // printf("%d\t%d\t%d\t%d\n", type, unclear_id, x, y);
-
+    sem_wait(&sem_control);
     struct input_event sync; //同步 直接用
     sync.type = 0;
     sync.code = 0;
@@ -86,7 +88,7 @@ int mapper(int type, int unclear_id, int x, int y)
     up.value = 0x0;
 
     int id = unclear_id;
-    if (type == 0) //移动:  切换ID,X,Y,同步 编码格式 "2 id x y"
+    if (type == 0) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
     {
         set_id.value = id;
         pos_x.value = x;
@@ -96,8 +98,13 @@ int mapper(int type, int unclear_id, int x, int y)
         write(touch_fd, &pos_y, sizeof(pos_y));
         write(touch_fd, &sync, sizeof(sync));
     }
-    else if (type == 2) //释放: 切换ID,uid=-1,同步 编码格式 "1 id"
+    else if (type == 2) //释放: 切换ID,uid=-1,同步 编码格式 "2 id 0 0"
     {
+        if (id == -1)
+        {
+            sem_post(&sem_control);
+            return -1;
+        }                  //没申请成功的释放请求
         touch_id[id] = 0;  // 释放
         allocatedID_num--; //占用数目-1
         set_id.value = id;
@@ -109,7 +116,7 @@ int mapper(int type, int unclear_id, int x, int y)
         write(touch_fd, &sync, sizeof(sync));
     }
     else if (type == 1)
-    {                 //type == pressTouch  按下： 切换ID，uid=自定义，x，y，同步 编码格式 "0 id x y"
+    {                 //type == pressTouch  按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 -1 x y"
         if (id == -1) //申请触摸 是一个新的触摸点 或者申请没有成功 理论上是继续拒绝
         {
             for (int i = 0; i < 10; i++)
@@ -125,8 +132,11 @@ int mapper(int type, int unclear_id, int x, int y)
                 }
             }
         }
-        if (id == -1) //分配失败 下次再说
+        if (id == -1)
+        { //分配失败 下次再说
+            sem_post(&sem_control);
             return -1;
+        }
 
         set_id.value = id;
         defineUID.value = 0xe2 + set_id.value;
@@ -140,13 +150,14 @@ int mapper(int type, int unclear_id, int x, int y)
         write(touch_fd, &pos_y, sizeof(pos_y));
         write(touch_fd, &sync, sizeof(sync));
     }
+    sem_post(&sem_control);
     return id;
 }
 
-int first_mouse_touch_id = -1; //鼠标映射的ID 唯一 第一次产生移动事件时按下 之后只有移动  切换映射的时候才释放
-int mouse_Start_x = 720;       ///开始结束坐标 只读
-int mouse_Start_y = 1600;      //中途可能有切换 还是会回到这里的
-int realtive_x, realtive_y;    //保存当前移动坐标
+int mouse_touch_id = -1;    //鼠标映射的ID 唯一 第一次产生移动事件时按下 之后只有移动  切换映射的时候才释放
+int mouse_Start_x = 720;    ///开始结束坐标 只读
+int mouse_Start_y = 1600;   //中途可能有切换 还是会回到这里的
+int realtive_x, realtive_y; //保存当前移动坐标
 int mouse_speedRatio = 1;
 int km_map_id[256 + 16];      //键盘code 对应分配的ID 按下获取 然后存入 释放的时候就从这里获取ID释放
                               //鼠标 鼠标按键还是挺多的 但是似乎编码不友好 所以是手动判断的重新编码的
@@ -173,9 +184,9 @@ void handel_m_q() //处理鼠标动作
                 y = m_q[0].value;
         }
 
-        if (first_mouse_touch_id == -1)
+        if (mouse_touch_id == -1)
         {
-            first_mouse_touch_id = mapper(1, first_mouse_touch_id, mouse_Start_x, mouse_Start_y); //按下 获取ID 应该为0
+            mouse_touch_id = main_controler(1, mouse_touch_id, mouse_Start_x, mouse_Start_y); //按下 获取ID 应该为0
             realtive_x = mouse_Start_x;
             realtive_y = mouse_Start_y; //相对X,Y
             return;
@@ -184,14 +195,14 @@ void handel_m_q() //处理鼠标动作
         realtive_y += x * mouse_speedRatio;
         if (realtive_x < 100 || realtive_x > 1400 || realtive_y < 100 || realtive_y > 3000)
         {
-            mapper(2, first_mouse_touch_id, 0, 0);
-            first_mouse_touch_id = -1;                                                            //松开
-            first_mouse_touch_id = mapper(1, first_mouse_touch_id, mouse_Start_x, mouse_Start_y); //再按下
+            main_controler(2, mouse_touch_id, 0, 0);
+            mouse_touch_id = -1;                                                              //松开
+            mouse_touch_id = main_controler(1, mouse_touch_id, mouse_Start_x, mouse_Start_y); //再按下
             realtive_x = mouse_Start_x;
             realtive_y = mouse_Start_y; //相对X,Y
         }
 
-        mapper(0, first_mouse_touch_id, realtive_x, realtive_y); //移动
+        main_controler(0, mouse_touch_id, realtive_x, realtive_y); //移动
         // printf("[%d,%d]\n", realtive_x, realtive_y);
     }
     else if (m_q[0].type == EV_MSC) //点击
@@ -203,11 +214,11 @@ void handel_m_q() //处理鼠标动作
             mouse_code = 1;
         if (m_q[1].value == DOWN) //按下
         {
-            km_map_id[256 + mouse_code] = mapper(1, -1, map_postion[256 + mouse_code][0], map_postion[256 + mouse_code][1]);
+            km_map_id[256 + mouse_code] = main_controler(1, -1, map_postion[256 + mouse_code][0], map_postion[256 + mouse_code][1]);
         }
         else if (m_q[1].value == UP) //释放
         {
-            mapper(2, km_map_id[256 + mouse_code], 0, 0);
+            main_controler(2, km_map_id[256 + mouse_code], 0, 0);
         }
     }
     m_len = 0;
@@ -216,13 +227,41 @@ void handel_m_q() //处理鼠标动作
 
 int wheel_satuse[4];                                                                                                                    //默认为0 初始化时和结束时也手动清0
 int wheel_postion[9][2] = {{300, 300}, {600, 300}, {900, 300}, {300, 600}, {600, 600}, {900, 600}, {300, 900}, {600, 900}, {900, 900}}; //8个状态的坐标
-int wheel_ID = -1;
+int wheel_touch_id = -1;
+int cur_x = 0, cur_y = 0; //当前位置
+int tar_x = 0, tar_y = 0; //目标位置
+int move_speed = 5;       //方向移动速度
+int frequency = 1000;     //周期秒数
+int wheel_manager()
+{
+
+    while (Exclusive_mode_flag)
+    {
+        int div_x = tar_x - cur_x;
+        int div_y = tar_y - cur_y;
+        if (div_x)
+        {
+            if (abs(div_x) > move_speed) //有待验证 < or > 命中
+                cur_x += div_x > 0 ? 1 * move_speed : -1 * move_speed;
+            else
+                cur_x = tar_x;
+        }
+        if (div_y)
+        {
+            if (abs(div_y) > move_speed) //有待验证 < or > 命中
+                cur_y += div_y > 0 ? 1 * move_speed : -1 * move_speed;
+            else
+                cur_y = tar_y;
+        }
+        if (div_x || div_y)
+        {
+            main_controler(0, wheel_touch_id, cur_x, cur_y); //正常移动
+        }
+        usleep(1000);
+    }
+}
 void change_wheel_satuse(int keyCode, int updown)
 {
-    int x_Asix = 1 - wheel_satuse[1] + wheel_satuse[3];
-    int y_Asix = 1 - wheel_satuse[2] + wheel_satuse[0];
-    int last_map_value = x_Asix * 3 + y_Asix;
-    int index = -1;
     switch (keyCode)
     {
     case KEY_W:
@@ -240,32 +279,10 @@ void change_wheel_satuse(int keyCode, int updown)
     default:
         break;
     }
-    x_Asix = 1 - wheel_satuse[1] + wheel_satuse[3];
-    y_Asix = 1 - wheel_satuse[2] + wheel_satuse[0];
-    int map_value = x_Asix * 3 + y_Asix;
-    // printf("[%d,%d,%d,%d]\n", wheel_satuse[0], wheel_satuse[1], wheel_satuse[2], wheel_satuse[3]);
-    // printf("x=%d,y=%d\n", x_Asix - 1, y_Asix - 1);
-    // printf("map_value=%d\n", map_value);
-    // return;
-    // printf("当前状态数组下标为%d\n", map_value);
-    if (last_map_value == 4 && map_value != 4) //开始 先按下 再移动
-    {
-        wheel_ID = mapper(1, -1, wheel_postion[4][0], wheel_postion[4][1]);            //
-        mapper(0, wheel_ID, wheel_postion[map_value][0], wheel_postion[map_value][1]); //移动
-    }
-    else
-    {
-        if (map_value != 4)
-        {
-
-            mapper(0, wheel_ID, wheel_postion[map_value][0], wheel_postion[map_value][1]); //正常移动
-        }
-        else
-        {
-            mapper(2, wheel_ID, 0, 0); //释放
-            wheel_ID = -1;
-        }
-    }
+    int map_value = (1 - wheel_satuse[1] + wheel_satuse[3]) * 3 + (1 - wheel_satuse[2] + wheel_satuse[0]);
+    tar_x = wheel_postion[map_value][0];
+    tar_y = wheel_postion[map_value][1];
+    // main_controler(0, wheel_touch_id, wheel_postion[map_value][0], wheel_postion[map_value][1]); //正常移动
 }
 
 void handel_k_q() //处理键盘动作
@@ -295,11 +312,11 @@ void handel_k_q() //处理键盘动作
         {
             if (updown == DOWN)
             {
-                km_map_id[keyCode] = mapper(1, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
+                km_map_id[keyCode] = main_controler(1, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
             }
             else
             {
-                mapper(2, km_map_id[keyCode], 0, 0); //释放
+                main_controler(2, km_map_id[keyCode], 0, 0); //释放
             }
         }
     }
@@ -332,8 +349,6 @@ void handelEvent(int flag, struct input_event receive_event) //是按照插入�
 int Exclusive_mode(char *argv[])
 {
     touch_fd = open(argv[1], O_RDWR);
-    for (int i = 0; i < 4; i++)
-        wheel_satuse[i] = 0; //清除方向盘状态
 
     if (touch_fd < 0)
     {
@@ -373,7 +388,13 @@ int Exclusive_mode(char *argv[])
     rcode = ioctl(mouse_fd, EVIOCGRAB, 1);
     printf("%s\n", (rcode == 0) ? "SUCCESS" : "FAILURE");
     struct input_event mouse_event;
-    int end = time(NULL) + 10;
+    wheel_touch_id = main_controler(1, -1, wheel_postion[4][0], wheel_postion[4][1]); //方向盘一开始就按下  WASD任何按键都不释放  切换状才会态统一释放
+    cur_x = wheel_postion[4][0];
+    cur_y = wheel_postion[4][1]; //设置当前位置
+    tar_x = cur_x;
+    tar_y = cur_y; //先赋值 再启动线程
+    pthread_t manager_thread;
+    pthread_create(&manager_thread, NULL, (void *)&wheel_manager, NULL);
     while (Exclusive_mode_flag == 1)
     {
         if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
@@ -388,16 +409,16 @@ int Exclusive_mode(char *argv[])
             handelEvent(mouse_dev, mouse_event);
         }
     }
-    printf("Exiting.\n");
+    pthread_join(manager_thread, NULL);
+    printf("Exiting Exclusive mode\n");
     rcode = ioctl(keyboard_fd, EVIOCGRAB, 1);
     close(keyboard_fd);
     rcode = ioctl(mouse_fd, EVIOCGRAB, 1);
     close(mouse_fd);
-
     /*
     检查所有触摸点
     手动释放所有的点
-    first_mouse_touch_id = -1;
+    mouse_touch_id = -1;
     */
     for (int i = 0; i < 4; i++)
         wheel_satuse[i] = 0; //清除方向盘状态
@@ -405,11 +426,11 @@ int Exclusive_mode(char *argv[])
     {
         if (touch_id[i] != 0)
         {
-            mapper(2, i, 0, 0); //释放所有按键
+            main_controler(2, i, 0, 0); //释放所有按键
         }
     }
-
-    first_mouse_touch_id = -1;
+    wheel_touch_id = -1;
+    mouse_touch_id = -1;
     close(touch_fd);
 
     return 0;
@@ -450,15 +471,17 @@ int no_Exclusive_mode()
 
 void rset_global()
 {
-    m_len = 0;
+    m_len = 0; //消息队列清空
     k_len = 0;
-    allocatedID_num = 0;
-    first_mouse_touch_id = -1;
-    wheel_ID = -1;
 }
 
 int main(int argc, char *argv[]) //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
+    if (sem_init(&sem_control, 0, 1) != 0)
+    {
+        perror("fail to sem_sem_control init");
+        exit(-1);
+    }
 
     char buf[1024 * 8];      //配置文件大小最大8KB
     chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
