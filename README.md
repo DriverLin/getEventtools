@@ -32,10 +32,8 @@ gcc mapper.c -o mapper
 
 
 获取脚本文件
-```
-[mapperTool](https://driverlin.github.io/Exclusive_mode_mapper/)
 
-```
+https://driverlin.github.io/Exclusive_mode_mapper/
 
 执行
 ```
