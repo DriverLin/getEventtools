@@ -29,9 +29,6 @@ wget https://raw.githubusercontent.com/DriverLin/Exclusive_mode_mapper/master/sr
 ```
 gcc mapper.c -o mapper
 ```
-
-[创建脚本文件](https://driverlin.github.io/Exclusive_mode_mapper/)
-
 执行
 ```
 sudo ./mapper 触屏设备号 鼠标设备号 键盘设备号 映射文件路径
@@ -39,15 +36,18 @@ sudo ./mapper 触屏设备号 鼠标设备号 键盘设备号 映射文件路径
 输出看起来应该是这样的
 ``` 
 $ sudo ./mapper 5 15 16 ./hpjy_br.mapper
-touch_dev_path:/dev/input/event5
-mouse_dev_path:/dev/input/event15
-keyboard_dev_path:/dev/input/event16
-reading config from ./hpjy_br.mapper...
+Touch_dev_path:/dev/input/event5
+Mouse_dev_path:/dev/input/event15
+Keyboard_dev_path:/dev/input/event16
+Reading config from ./hpjy_br.mapper
 Reading From : HID 046a:0011
 ```
-按下～即可开启映射
+按～键开关映射
 
-## 关于脚本
+## 关于映射文件
+
+[创建映射文件](https://driverlin.github.io/Exclusive_mode_mapper/)
+
 按住键盘按键点击对应位置即可生成并自动复制到剪贴板
 
 数字键8,9,0对应鼠标左中右键
@@ -55,4 +55,8 @@ Reading From : HID 046a:0011
 S用于定位摇杆中心
 
 W用于限制摇杆范围
+
+目前只支持WASD左摇杆+鼠标控制视角+按键映射点击位置
+
+等回学校了会添加对手柄的支持
 
