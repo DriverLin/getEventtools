@@ -162,7 +162,7 @@ int mouse_Start_y = 1600;   //中途可能有切换 还是会回到这里的
 int realtive_x, realtive_y; //保存当前移动坐标
 int mouse_speedRatio = 1;
 int km_map_id[256 + 8];      //键盘鼠标code 对应分配的ID 按下获取并存入 释放的时候就从这里获取ID释放
-                             //鼠标 鼠标按键还是挺多的，编码是0x110开始 0~7个
+                             //鼠标编码0x110开始 0~7个
                              //将其放在了一起 鼠标加偏移量256
 int map_postion[256 + 8][2]; //映射的XY坐标
 
@@ -238,26 +238,28 @@ void wheel_manager()
             main_controler(2, wheel_touch_id, 0, 0); //释放
             wheel_touch_id = -1;
             release_flag--; //确保在不按下按键时 执行
-            continue;
         }
-        int div_x = tar_x - cur_x;
-        int div_y = tar_y - cur_y;
-        if (div_x)
+        else
         {
-            if (abs(div_x) > move_speed)
-                cur_x += div_x > 0 ? 1 * move_speed : -1 * move_speed;
-            else
-                cur_x = tar_x;
+            int div_x = tar_x - cur_x;
+            int div_y = tar_y - cur_y;
+            if (div_x)
+            {
+                if (abs(div_x) > move_speed)
+                    cur_x += div_x > 0 ? 1 * move_speed : -1 * move_speed;
+                else
+                    cur_x = tar_x;
+            }
+            if (div_y)
+            {
+                if (abs(div_y) > move_speed)
+                    cur_y += div_y > 0 ? 1 * move_speed : -1 * move_speed;
+                else
+                    cur_y = tar_y;
+            }
+            if (div_x || div_y)
+                main_controler(0, wheel_touch_id, cur_x, cur_y); //正常移动
         }
-        if (div_y)
-        {
-            if (abs(div_y) > move_speed)
-                cur_y += div_y > 0 ? 1 * move_speed : -1 * move_speed;
-            else
-                cur_y = tar_y;
-        }
-        if (div_x || div_y)
-            main_controler(0, wheel_touch_id, cur_x, cur_y); //正常移动
         usleep(frequency);
     }
 }
@@ -287,7 +289,6 @@ void change_wheel_satuse(int keyCode, int updown)
     x_Asix = 1 - wheel_satuse[1] + wheel_satuse[3];
     y_Asix = 1 - wheel_satuse[2] + wheel_satuse[0];
     int map_value = x_Asix * 3 + y_Asix;
-
     if (last_map_value == 4 && map_value != 4) //按下 移动
     {
         tar_x = wheel_postion[4][0];
@@ -302,7 +303,6 @@ void change_wheel_satuse(int keyCode, int updown)
     {
         if (map_value != 4) //正常移动
         {
-
             tar_x = wheel_postion[map_value][0];
             tar_y = wheel_postion[map_value][1];
         }
@@ -467,17 +467,17 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     sprintf(touch_dev_path, "/dev/input/event%d", touch_dev_num);
     sprintf(mouse_dev_path, "/dev/input/event%d", mouse_dev_num);
     sprintf(keyboard_dev_path, "/dev/input/event%d", keyboard_dev_num);
-    printf("touch_dev_path:%s\n", touch_dev_path);
-    printf("mouse_dev_path:%s\n", mouse_dev_path);
-    printf("keyboard_dev_path:%s\n", keyboard_dev_path);
+    printf("Touch_dev_path:%s\n", touch_dev_path);
+    printf("Mouse_dev_path:%s\n", mouse_dev_path);
+    printf("Keyboard_dev_path:%s\n", keyboard_dev_path);
     if (sem_init(&sem_control, 0, 1) != 0)
     {
-        perror("fail to sem_sem_control init");
+        perror("Fail to sem_sem_control init");
         exit(-1);
     }
     char buf[1024 * 8];      //配置文件大小最大8KB
     chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
-    printf("reading config from %s...\n", argv[4]);
+    printf("Reading config from %s\n", argv[4]);
     FILE *fp = fopen(argv[4], "r");
     if (fp == NULL)
     {
