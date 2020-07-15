@@ -413,7 +413,12 @@ int no_Exclusive_mode()
     struct input_event keyboard_event;
     while (no_Exclusive_mode_flag == 1)
         if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
-            handelEvent(keyboard_dev, keyboard_event);
+        {
+            k_q[k_len] = keyboard_event;
+            k_len++;
+            if (keyboard_event.type == 0 && keyboard_event.code == 0 && keyboard_event.value == 0)
+                handel_k_q();
+        }
     printf("Exiting.\n");
     close(keyboard_fd);
     return 0;
