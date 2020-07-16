@@ -124,7 +124,6 @@ int main_controler(int type, int unclear_id, int x, int y)
             sem_post(&sem_control);
             return -1;
         }
-
         printf("按下,%d->%d,%d,%d\n", unclear_id, id, x, y);
         if (SWITCH_ID_EVENT.value != id)
         {
