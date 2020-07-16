@@ -43,7 +43,7 @@ int postion[10][2];
 int allocatedID_num = 0;
 
 struct input_event SYNC_EVENT = {0, EV_SYN, SYN_REPORT, 0};               //同步 最常用的 直接用
-struct input_event SWITCH_ID_EVENT = {0, EV_ABS, ABS_MT_SLOT, 0};         //切换触摸点 修改value再用
+struct input_event SWITCH_ID_EVENT = {0, EV_ABS, ABS_MT_SLOT, -1};        //切换触摸点 修改value再用
 struct input_event POS_X_EVENT = {0, EV_ABS, ABS_MT_POSITION_X, 0};       //X坐标
 struct input_event POS_Y_EVENT = {0, EV_ABS, ABS_MT_POSITION_Y, 0};       //Y坐标
 struct input_event DEFINE_UID_EVENT = {0, EV_ABS, ABS_MT_TRACKING_ID, 0}; //声明识别ID 用于消除
@@ -66,10 +66,13 @@ int main_controler(int type, int unclear_id, int x, int y)
     int id = unclear_id;
     if (type == MOVE_FLAG) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
     {
-        SWITCH_ID_EVENT.value = id;
         POS_X_EVENT.value = x;
         POS_Y_EVENT.value = y;
-        write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        if (SWITCH_ID_EVENT.value != id)
+        {
+            SWITCH_ID_EVENT.value = id;
+            write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        }
         write(touch_fd, &POS_X_EVENT, sizeof(POS_X_EVENT));
         write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
         write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
@@ -83,9 +86,12 @@ int main_controler(int type, int unclear_id, int x, int y)
         }                  //没申请成功的释放请求
         touch_id[id] = 0;  // 释放
         allocatedID_num--; //占用数目-1
-        SWITCH_ID_EVENT.value = id;
         DEFINE_UID_EVENT.value = 0xffffffff;
-        write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        if (SWITCH_ID_EVENT.value != id)
+        {
+            SWITCH_ID_EVENT.value = id;
+            write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        }
         write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
         if (allocatedID_num == 0) //为0 全部释放 btn up
             write(touch_fd, &BTN_UP_EVENT, sizeof(BTN_UP_EVENT));
@@ -113,11 +119,15 @@ int main_controler(int type, int unclear_id, int x, int y)
             sem_post(&sem_control);
             return -1;
         }
-        SWITCH_ID_EVENT.value = id;
-        DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
+
+        DEFINE_UID_EVENT.value = 0xe2 + id;
         POS_X_EVENT.value = x;
         POS_Y_EVENT.value = y;
-        write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        if (SWITCH_ID_EVENT.value != id)
+        {
+            SWITCH_ID_EVENT.value = id;
+            write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+        }
         write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
         if (allocatedID_num == 1) //为1 则是头一次按下 btn down
             write(touch_fd, &BTN_DOWN_EVENT, sizeof(BTN_DOWN_EVENT));
@@ -391,7 +401,8 @@ int Exclusive_mode()
         if (touch_id[i] != 0)
             main_controler(RELEASE_FLAG, i, 0, 0); //释放所有按键
     mouse_touch_id = -1;
-
+    wheel_touch_id = -1;
+    SWITCH_ID_EVENT.value = -1; //不再每次都切换ID
     close(touch_fd);
     return 0;
 }
