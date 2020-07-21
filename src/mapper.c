@@ -184,7 +184,7 @@ void handel_Mouse_queue()    //处理鼠标动作
         }
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
-        if (realtive_x < 100 || realtive_x > 1400 || realtive_y < 100 || realtive_y > 3000)
+        if (realtive_x < 100 || realtive_x > mouse_Start_x * 2 - 100 || realtive_y < 100 || realtive_y > mouse_Start_y * 2 - 100)
         {
             main_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);
             mouse_touch_id = -1;                                                                         //松开
