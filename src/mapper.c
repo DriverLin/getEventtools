@@ -184,7 +184,7 @@ void handel_Mouse_queue()    //处理鼠标动作
         }
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
-        if (realtive_x < 100 || realtive_x > mouse_Start_x * 2 - 100 || realtive_y < 100 || realtive_y > mouse_Start_y * 2 - 100)
+        if (realtive_x < 0 || realtive_x > mouse_Start_x * 2 || realtive_y < mouse_Start_y / 3 * 2 || realtive_y > mouse_Start_y / 3 * 4)
         {
             main_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);
             mouse_touch_id = -1;                                                                         //松开
@@ -212,7 +212,7 @@ int wheel_postion[9][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0
 int wheel_touch_id = -1;
 int cur_x = 0, cur_y = 0; //当前位置
 int tar_x = 0, tar_y = 0; //目标位置
-int move_speed = 5;       //方向移动速度
+int move_speed = 10;      //方向移动速度
 int frequency = 500;      //方向移动频率 关系到相应方向键速度
 int release_flag = 0;     //确保释放操作只执行一次
 void wheel_manager()
