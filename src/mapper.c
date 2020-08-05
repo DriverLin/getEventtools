@@ -19,6 +19,7 @@
 #define MOVE_FLAG 0x0
 #define RELEASE_FLAG 0x2
 #define REQURIE_FLAG 0x1
+// #define _DEBUG
 
 char touch_dev_path[80];
 char keyboard_dev_path[80];
@@ -39,7 +40,6 @@ struct input_event Keyboard_queue[16]; //键盘信号队列
 int k_len = 0;                         //键盘队列长度
 
 int touch_id[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int postion[10][2];
 int allocatedID_num = 0;
 
 struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};          //同步 最常用的 直接用
@@ -59,13 +59,19 @@ struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = U
 //返回触摸点的ID 下次带上
 //鼠标的映射 鼠标一开始就占一个 切换后才释放 是申请还是移动 在外边判断
 //由于多线程 保证安全加上PV
-sem_t sem_control;
-int main_controler(int type, int unclear_id, int x, int y)
+sem_t touch_dev_controler_sem_control;
+int touch_dev_controler(int type, int unclear_id, int x, int y)
 {
-    // printf("%d\t%d\t%d\t%d\n", type, unclear_id, x, y);
-    sem_wait(&sem_control);
+#ifdef _DEBUG
+    for (int i = 0; i < 10; i++)
+        printf("%d", touch_id[i]); //当前状态
+    printf("\tallocated:%d", allocatedID_num);
+    printf("\n%d\t%d\t%d\t%d\n", type, unclear_id, x, y);
+#endif
+
+    sem_wait(&touch_dev_controler_sem_control);
     int id = unclear_id;
-    if (type == 0) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
+    if ((type == 0) && (id != -1)) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
     {
         if (SWITCH_ID_EVENT.value != id)
         {
@@ -78,14 +84,8 @@ int main_controler(int type, int unclear_id, int x, int y)
         write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
         write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
     }
-    else if (type == 2) //释放: 切换ID,uid=-1,同步 编码格式 "2 id 0 0"
+    else if ((type == 2) && (id != -1)) //释放: 切换ID,uid=-1,同步 编码格式 "2 id * *"
     {
-        printf("释放,%d\n", unclear_id);
-        if (id == -1)
-        {
-            sem_post(&sem_control);
-            return -1;
-        }                  //没申请成功的释放请求
         touch_id[id] = 0;  // 释放
         allocatedID_num--; //占用数目-1
         if (SWITCH_ID_EVENT.value != id)
@@ -93,56 +93,56 @@ int main_controler(int type, int unclear_id, int x, int y)
             SWITCH_ID_EVENT.value = id;
             write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
         }
-        // SWITCH_ID_EVENT.value = id;
         DEFINE_UID_EVENT.value = 0xffffffff;
-        // write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
         write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
         if (allocatedID_num == 0) //为0 全部释放 btn up
+        {
             write(touch_fd, &BTN_UP_EVENT, sizeof(BTN_UP_EVENT));
+#ifdef _DEBUG
+            printf("BTN_UP\n");
+#endif
+        }
         write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
     }
     else if (type == 1)
-    { //type == pressTouch  按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 -1 x y"
-
-        if (id == -1) //申请触摸 是一个新的触摸点 或者申请没有成功 理论上是继续拒绝
+    { //按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 * x y"
+        for (int i = 0; i < 10; i++)
         {
-            for (int i = 0; i < 10; i++)
+            if (touch_id[i] == 0) //找寻一个空的
             {
-                if (touch_id[i] == 0) //找寻一个空的
-                {
-                    id = i;          //分配id
-                    touch_id[i] = 1; //记录此置位已占用
-                    postion[i][0] = x;
-                    postion[i][1] = y; //更新位置
-                    allocatedID_num++; //已分配计数+1
-                    break;
-                }
+                id = i;            //分配id
+                touch_id[i] = 1;   //记录此置位已占用
+                allocatedID_num++; //已分配计数+1
+                break;
             }
         }
-        if (id == -1)
-        { //分配失败 下次再说
-            sem_post(&sem_control);
-            return -1;
-        }
-        printf("按下,%d->%d,%d,%d\n", unclear_id, id, x, y);
-        if (SWITCH_ID_EVENT.value != id)
+        if (id != -1)
         {
             SWITCH_ID_EVENT.value = id;
+            DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
+            POS_X_EVENT.value = x;
+            POS_Y_EVENT.value = y;
             write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
+            write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
+            if (allocatedID_num == 1)
+            { //为1 则是头一次按下 btn down
+                write(touch_fd, &BTN_DOWN_EVENT, sizeof(BTN_DOWN_EVENT));
+#ifdef _DEBUG
+                printf("BTN_DOWN\n");
+#endif
+            }
+            write(touch_fd, &POS_X_EVENT, sizeof(POS_X_EVENT));
+            write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
+            write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
         }
-        // SWITCH_ID_EVENT.value = id;
-        DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
-        POS_X_EVENT.value = x;
-        POS_Y_EVENT.value = y;
-        // write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
-        write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
-        if (allocatedID_num == 1) //为1 则是头一次按下 btn down
-            write(touch_fd, &BTN_DOWN_EVENT, sizeof(BTN_DOWN_EVENT));
-        write(touch_fd, &POS_X_EVENT, sizeof(POS_X_EVENT));
-        write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
-        write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
     }
-    sem_post(&sem_control);
+#ifdef _DEBUG
+    for (int i = 0; i < 10; i++)
+        printf("%d", touch_id[i]); //分配后状态
+    printf("\tallocated:%d", allocatedID_num);
+    printf("\n\n");
+#endif
+    sem_post(&touch_dev_controler_sem_control);
     return id;
 }
 
@@ -157,51 +157,64 @@ int km_map_id[256 + 8];      //键盘鼠标code 对应分配的ID 按下获取�
 int map_postion[256 + 8][2]; //映射的XY坐标
 void handel_Mouse_queue()    //处理鼠标动作
 {
-
-    if (Mouse_queue[0].type == 2) //移动
+    if (mouse_touch_id == -1) //第一次移动  之后不再申请
+    {
+        mouse_touch_id = touch_dev_controler(REQURIE_FLAG, -1, mouse_Start_x, mouse_Start_y); //按下 获取ID 应该为0
+        realtive_x = mouse_Start_x;
+        realtive_y = mouse_Start_y; //相对X,Y
+        return;
+    }
+    if (Mouse_queue[0].type == EV_REL) //移动
     {
         int x = 0;
         int y = 0;
-        if (m_len == 3)
-        { //X和Y 顺序是固定的 先X 后y
+        if (m_len == 3) //为3 则必定是X,Y
+        {               //X和Y 顺序是固定的 先X 后y
             x = Mouse_queue[0].value;
             y = Mouse_queue[1].value;
         }
-        else
+        else if (Mouse_queue[0].code == REL_X)
         { //单个 x或y
-            if (Mouse_queue[0].code == 0)
-                x = Mouse_queue[0].value;
-            else
-                y = Mouse_queue[0].value;
+            x = Mouse_queue[0].value;
         }
-
-        if (mouse_touch_id == -1)
+        else if (Mouse_queue[0].code == REL_Y)
         {
-            mouse_touch_id = main_controler(REQURIE_FLAG, mouse_touch_id, mouse_Start_x, mouse_Start_y); //按下 获取ID 应该为0
-            realtive_x = mouse_Start_x;
-            realtive_y = mouse_Start_y; //相对X,Y
+            y = Mouse_queue[0].value;
+        }
+        else //这里可以处理滚轮事件
+        {
+            m_len = 0;
             return;
         }
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
         if (realtive_x < 0 || realtive_x > mouse_Start_x * 2 || realtive_y < mouse_Start_y / 3 * 2 || realtive_y > mouse_Start_y / 3 * 4)
         {
-            main_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);
-            mouse_touch_id = -1;                                                                         //松开
-            mouse_touch_id = main_controler(REQURIE_FLAG, mouse_touch_id, mouse_Start_x, mouse_Start_y); //再按下
+            touch_dev_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);                              //松开
+            mouse_touch_id = touch_dev_controler(REQURIE_FLAG, -1, mouse_Start_x, mouse_Start_y); //再按下
             realtive_x = mouse_Start_x;
             realtive_y = mouse_Start_y; //相对X,Y
         }
-        main_controler(MOVE_FLAG, mouse_touch_id, realtive_x, realtive_y); //移动
+        touch_dev_controler(MOVE_FLAG, mouse_touch_id, realtive_x, realtive_y); //移动
         // printf("[%d,%d]\n", realtive_x, realtive_y);
     }
-    else if (Mouse_queue[0].type == EV_MSC) //点击事件
+    else if (Mouse_queue[0].type == EV_MSC) //点击
     {
-        int mouse_code = 256 + Mouse_queue[1].code - BTN_MOUSE; //0x110为左键 -0x110获得鼠标按键偏移
-        if (Mouse_queue[1].value == DOWN)                       //按下
-            km_map_id[mouse_code] = main_controler(REQURIE_FLAG, -1, map_postion[mouse_code][0], map_postion[mouse_code][1]);
-        else //释放
-            main_controler(RELEASE_FLAG, km_map_id[mouse_code], 0, 0);
+        for (int i = 0; i < m_len; i++)
+        {
+            if (Mouse_queue[i].type == EV_KEY)
+            {
+                int mouse_code = 256 + Mouse_queue[i].code - BTN_MOUSE; //0x110为左键 -0x110获得鼠标按键偏移
+                if (Mouse_queue[i].value == DOWN)
+                {
+                    km_map_id[mouse_code] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[mouse_code][0], map_postion[mouse_code][1]);
+                }
+                else if (Mouse_queue[i].value == UP)
+                {
+                    touch_dev_controler(RELEASE_FLAG, km_map_id[mouse_code], 0, 0);
+                }
+            }
+        }
     }
     m_len = 0;
     return;
@@ -223,7 +236,7 @@ void wheel_manager()
         {
             cur_x = tar_x;
             cur_y = tar_y;
-            main_controler(2, wheel_touch_id, 0, 0); //释放
+            touch_dev_controler(2, wheel_touch_id, 0, 0); //释放
             wheel_touch_id = -1;
             release_flag--; //确保在不按下按键时 执行
         }
@@ -246,7 +259,7 @@ void wheel_manager()
                     cur_y = tar_y;
             }
             if (div_x || div_y)
-                main_controler(0, wheel_touch_id, cur_x, cur_y); //正常移动
+                touch_dev_controler(0, wheel_touch_id, cur_x, cur_y); //正常移动
         }
         usleep(frequency);
     }
@@ -282,8 +295,8 @@ void change_wheel_satuse(int keyCode, int updown)
         tar_x = wheel_postion[4][0];
         tar_y = wheel_postion[4][1];
         cur_x = tar_x;
-        cur_y = tar_y;                                                                    //设置起始位置和目标位置为中点
-        wheel_touch_id = main_controler(1, -1, wheel_postion[4][0], wheel_postion[4][1]); //按下中点
+        cur_y = tar_y;                                                                         //设置起始位置和目标位置为中点
+        wheel_touch_id = touch_dev_controler(1, -1, wheel_postion[4][0], wheel_postion[4][1]); //按下中点
         tar_x = wheel_postion[map_value][0];
         tar_y = wheel_postion[map_value][1]; //设置移动目标
     }
@@ -320,14 +333,20 @@ void handel_Keyboard_queue() //处理键盘动作
         else if (map_postion[keyCode][0] && map_postion[keyCode][1])
         { //映射坐标不为0 设定映射
             if (updown == DOWN)
-                km_map_id[keyCode] = main_controler(REQURIE_FLAG, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
+                km_map_id[keyCode] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
             else
-                main_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
+                touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
         }
     }
     k_len = 0; //队列清空
     return;
 }
+
+typedef struct list_Array
+{
+    int val;
+    struct list_Array *next;
+} list_Array;
 int Exclusive_mode()
 {
     touch_fd = open(touch_dev_path, O_RDWR); //触摸设备号
@@ -374,8 +393,14 @@ int Exclusive_mode()
     cur_y = wheel_postion[4][1];
     tar_x = cur_x;
     tar_y = cur_y; //管理器位置重置
-    pthread_t manager_thread;
-    pthread_create(&manager_thread, NULL, (void *)&wheel_manager, NULL);
+    pthread_t wheel_manager_thread;
+    pthread_create(&wheel_manager_thread, NULL, (void *)&wheel_manager, NULL);
+#ifdef _DEBUG
+    int interval = 0;
+    list_Array *head = (list_Array *)malloc(sizeof(list_Array));
+    head->val = -1;
+    list_Array *p = head;
+#endif
     while (Exclusive_mode_flag == 1)
     {
         if (read(mouse_fd, &mouse_event, sizeof(mouse_event)) != -1)
@@ -383,18 +408,62 @@ int Exclusive_mode()
             Mouse_queue[m_len] = mouse_event;
             m_len++;
             if (mouse_event.type == 0 && mouse_event.code == 0 && mouse_event.value == 0)
+            {
                 handel_Mouse_queue(); //同步信号 转处理
+#ifdef _DEBUG
+                list_Array *current_interval = (list_Array *)malloc(sizeof(list_Array));
+                current_interval->val = interval;
+                p->next = current_interval;
+                p = p->next;
+                interval = 0;
+#endif
+            }
         }
         if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
         {
             Keyboard_queue[k_len] = keyboard_event;
             k_len++;
             if (keyboard_event.type == 0 && keyboard_event.code == 0 && keyboard_event.value == 0)
+            {
                 handel_Keyboard_queue();
+
+#ifdef _DEBUG
+                list_Array *current_interval = (list_Array *)malloc(sizeof(list_Array));
+                current_interval->val = interval;
+                p->next = current_interval;
+                p = p->next;
+                interval = 0;
+#endif
+            }
         }
+#ifdef _DEBUG
+        interval++;
+#endif
     }
+#ifdef _DEBUG
+    printf("=====================\n");
+    p->next = NULL;
+    p = head;
+    int len_count = 0;
+    while (p != NULL)
+    {
+        len_count++;
+        int data = p->val;
+        p = p->next;
+        printf("%d\t%d\n", len_count, data);
+    }
+    p = head;
+    while (p != NULL)
+    {
+        len_count++;
+        list_Array *tmp = p;
+        p = p->next;
+        free(tmp);
+    }
+    printf("=====================\n");
+#endif
     printf("Exiting.\n");
-    pthread_join(manager_thread, NULL);
+    pthread_join(wheel_manager_thread, NULL);
     rcode = ioctl(keyboard_fd, EVIOCGRAB, 1);
     close(keyboard_fd);
     rcode = ioctl(mouse_fd, EVIOCGRAB, 1);
@@ -403,9 +472,10 @@ int Exclusive_mode()
         wheel_satuse[i] = 0; //清除方向盘状态
     for (int i = 0; i < 10; i++)
         if (touch_id[i] != 0)
-            main_controler(2, i, 0, 0); //释放所有按键
+            touch_dev_controler(2, i, 0, 0); //释放所有按键
     mouse_touch_id = -1;
     SWITCH_ID_EVENT.value = 0xffff;
+    allocatedID_num = 0;
     close(touch_fd);
     return 0;
 }
@@ -451,9 +521,9 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     printf("Touch_dev_path:%s\n", touch_dev_path);
     printf("Mouse_dev_path:%s\n", mouse_dev_path);
     printf("Keyboard_dev_path:%s\n", keyboard_dev_path);
-    if (sem_init(&sem_control, 0, 1) != 0)
+    if (sem_init(&touch_dev_controler_sem_control, 0, 1) != 0)
     {
-        perror("Fail to sem_sem_control init");
+        perror("Fail to touch_dev_controler_sem_control init");
         exit(-1);
     }
     char buf[1024 * 8];      //配置文件大小最大8KB
