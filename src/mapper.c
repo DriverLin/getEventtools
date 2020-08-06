@@ -188,12 +188,12 @@ void handel_Mouse_queue()    //处理鼠标动作
         }
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
-        if (realtive_x < 0 || realtive_x > mouse_Start_x * 2 || realtive_y < mouse_Start_y / 3 * 2 || realtive_y > mouse_Start_y / 3 * 4)
+        if (realtive_x < 0 || realtive_x > mouse_Start_x * 2 || realtive_y < 0 || realtive_y > (mouse_Start_y - 200) * 2)
         {
             touch_dev_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);                              //松开
             mouse_touch_id = touch_dev_controler(REQURIE_FLAG, -1, mouse_Start_x, mouse_Start_y); //再按下
-            realtive_x = mouse_Start_x;
-            realtive_y = mouse_Start_y; //相对X,Y
+            realtive_x = mouse_Start_x - y * mouse_speedRatio;
+            realtive_y = mouse_Start_y + x * mouse_speedRatio; //相对X,Y
         }
         touch_dev_controler(MOVE_FLAG, mouse_touch_id, realtive_x, realtive_y); //移动
         // printf("[%d,%d]\n", realtive_x, realtive_y);
