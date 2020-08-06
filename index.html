@@ -251,7 +251,7 @@
                 relative = wheel_start_x - 10
             }
             console.log("x:" + parseInt(wheel_start_x), "   y:" + parseInt(wheely_start_y), "   len:" + parseInt(relative))
-            text += parseInt(X / 2) + " " + parseInt(Y / 4 * 3) + " 1\n"
+            text += parseInt(X / 2) + " " + parseInt(Y / 2 + 200) + " 1\n"
             var wheelNumCount = 0;
             for (var posY of [parseInt(wheely_start_y - relative), parseInt(wheely_start_y), parseInt(wheely_start_y + relative)]) {
                 for (var posX of [parseInt(wheel_start_x - relative), parseInt(wheel_start_x), parseInt(wheel_start_x + relative)]) {
