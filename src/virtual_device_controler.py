@@ -4,73 +4,75 @@ import socket
 import time
 
 udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sendArr = ('192.168.1.231', 8848)
+sendArr = ('192.168.44.1', 8848)
 
 key_stause = [False for x in range(256)]
 
+Exclusive_mode = True
+
 
 def onKeyboardEvent(event):
-    if event.Key == "Escape":
-        udpSocket.sendto("end".encode('utf-8'), sendArr)
-        exit(0)
+    global Exclusive_mode, firstFlag
+    if event.Key == "Escape" and event.Message == 257:
+        Exclusive_mode = not Exclusive_mode
+        # firstFlag = True
+        return True
+    if Exclusive_mode == False:
+        return True
     if event.Message == 256 and key_stause[event.ScanCode] == False:
         key_stause[event.ScanCode] = True
-        print("down")
-        print(event.ScanCode)
-        udpSocket.sendto(str(event.ScanCode*-1).encode('utf-8'), sendArr)
+        udpSocket.sendto(
+            str(event.ScanCode+100000000).encode('utf-8'), sendArr)
     elif event.Message == 257 and key_stause[event.ScanCode] == True:
         key_stause[event.ScanCode] = False
-        print("up")
-        print(event.ScanCode)
-        udpSocket.sendto(str(event.ScanCode).encode('utf-8'), sendArr)
+        udpSocket.sendto(
+            str(event.ScanCode+200000000).encode('utf-8'), sendArr)
 
     return False
 
 
-flag = False
-
-lastx, lasty = 0, 0
-startx, starty = 1481, 705
-relativeX, relativeY = startx, starty
+start_x, start_y = -1, -1
+firstFlag = True
+relativeX, relativeY = 0, 0
 
 
 def onMouseEvent(event):
-    global flag, lastx, lasty, startx, starty, relativeX, relativeY
-    if "left down" in event.MessageName:
-        lastx, lasty = event.Position
-        relativeX, relativeY = startx, starty
-        flag = True
+    global start_x, start_y, firstFlag, Exclusive_mode
+    if Exclusive_mode == False:
+        start_x, start_y = event.Position
         return True
-    if "left up" in event.MessageName:
-        flag = False
-        return True
-    if(flag):
-        x, y = event.Position
-        relativeX -= (x-lastx)
-        relativeY += (y-lasty)
-        if(relativeX not in range(50, 3000) or relativeY not in range(34, 1300)):
-            flag = False
-            relativeX, relativeY = startx, starty
-            flag = True
-        else:
-            pass
-            print(relativeX, relativeY)
-
+    if firstFlag:
+        firstFlag = False
+        start_x, start_y = event.Position
         return False
-    return True
+    currentx, currenty = event.Position
+    relativeX = currentx - start_x
+    relativeY = currenty - start_y
+    if(relativeX != 0 or relativeY != 0):
+        udpSocket.sendto(str((100000000+relativeX*10000) % 100000000 +
+                             (relativeY+10000) % 10000).encode('utf-8'), sendArr)
+    # print(event.MessageName)
+    mapper = {
+        "mouse left up": 272+200000000,
+        "mouse left down": 272+100000000,
+        "mouse right down": 273+100000000,
+        "mouse right up": 273+200000000,
+        "mouse middle down": 274+100000000,
+        "mouse middle up": 274+200000000,
+    }
+    if event.MessageName in mapper:
+        udpSocket.sendto(
+            str(mapper[event.MessageName]).encode('utf-8'), sendArr)
+    return False
 
 
 def main():
-        # 创建管理器
     hm = PyHook3.HookManager()
-    # 监听键盘
     hm.KeyDown = onKeyboardEvent
     hm.KeyUp = onKeyboardEvent
     hm.HookKeyboard()
-    # 监听鼠标
     hm.MouseAll = onMouseEvent
     hm.HookMouse()
-    # 循环监听
     pythoncom.PumpMessages()
 
 
