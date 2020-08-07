@@ -3,6 +3,7 @@
         "*.cjson": "jsonc",
         "*.wxss": "css",
         "*.wxs": "javascript",
-        "type_traits": "c"
+        "type_traits": "c",
+        "typeinfo": "c"
     }
 }
