@@ -4,7 +4,7 @@ import socket
 import time
 
 udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sendArr = ('192.168.44.1', 8848)
+sendArr = ('192.168.1.231', 8848)
 
 key_stause = [False for x in range(256)]
 
