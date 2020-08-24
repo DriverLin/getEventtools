@@ -14,6 +14,13 @@
 #include <semaphore.h>
 #include <pthread.h>
 
+#define PRINT(a)                   \
+    do                             \
+    {                              \
+        printf("%s: %d\n", #a, a); \
+        printf("%d: %d\n", a, a);  \
+    } while (0)
+
 #define DOWN 0x1
 #define UP 0x0
 #define MOVE_FLAG 0x0
@@ -82,18 +89,30 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
         }
         write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
     }
-    else if (type == REQURIE_FLAG)
-    {                                //按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 * x y"
-        for (int i = 2; i < 10; i++) // 0 1 保留给鼠标移动和方向控制
+    else if (type == REQURIE_FLAG || type == MOUSE_REQUIRE || type == WHEEL_REQUIRE)
+    { //按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 * x y"
+        if (type == MOUSE_REQUIRE)
         {
-            if (touch_id[i] == 0) //找寻一个空的
-            {
-                id = i;            //分配id
-                touch_id[i] = 1;   //记录此置位已占用
-                allocatedID_num++; //已分配计数+1
-                break;
-            }
+            id = 0;
+            allocatedID_num++;
         }
+        else if (type == WHEEL_REQUIRE)
+        {
+            id = 1;
+            allocatedID_num++;
+        }
+        else
+
+            for (int i = 2; i < 10; i++) // 0 1 保留给鼠标移动和方向控制
+            {
+                if (touch_id[i] == 0) //找寻一个空的
+                {
+                    id = i;            //分配id
+                    touch_id[i] = 1;   //记录此置位已占用
+                    allocatedID_num++; //已分配计数+1
+                    break;
+                }
+            }
         if (id != -1)
         {
             SWITCH_ID_EVENT.value = id;
@@ -111,54 +130,22 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
             write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
         }
     }
-    else if (type == MOUSE_REQUIRE) //鼠标固定为0
-    {
-        id = 0;
-        SWITCH_ID_EVENT.value = id;
-        DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
-        POS_X_EVENT.value = x;
-        POS_Y_EVENT.value = y;
-        write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
-        write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
-        if (allocatedID_num == 1)
-        { //为1 则是头一次按下 btn down
-            write(touch_fd, &BTN_DOWN_EVENT, sizeof(BTN_DOWN_EVENT));
-        }
-        write(touch_fd, &POS_X_EVENT, sizeof(POS_X_EVENT));
-        write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
-        write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
-    }
-    else if (type == WHEEL_REQUIRE) //移动固定为1
-    {
-        id = 1;
-        SWITCH_ID_EVENT.value = id;
-        DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
-        POS_X_EVENT.value = x;
-        POS_Y_EVENT.value = y;
-        write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
-        write(touch_fd, &DEFINE_UID_EVENT, sizeof(DEFINE_UID_EVENT));
-        if (allocatedID_num == 1)
-        { //为1 则是头一次按下 btn down
-            write(touch_fd, &BTN_DOWN_EVENT, sizeof(BTN_DOWN_EVENT));
-        }
-        write(touch_fd, &POS_X_EVENT, sizeof(POS_X_EVENT));
-        write(touch_fd, &POS_Y_EVENT, sizeof(POS_Y_EVENT));
-        write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
-    }
     sem_post(&touch_dev_controler_sem_control);
     return id;
 }
-
 int ls_x_val = 0, ls_y_val = 0;
 int ls_touch_start_x = 600, ls_touch_start_y = 600;
 int ls_touch_last_x = -1, ls_touch_last_y = -1;
-int ls_frequency = 500;
+int ls_frequency = 5000;
 int ls_move_Range = 300;
 void LS_manager() //左摇杆
 {
+    int ls_touch_start_x = 600, ls_touch_start_y = 600;
+    printf("LS_manager thread start\n");
     int LS_TOUCH_id = -1;
     while (Exclusive_mode_flag)
     {
+
         if (ls_x_val == 0 && ls_y_val == 0) //如果都为0 则不操作 并且，如果是按下状态就释放
         {                                   //死区的判定 在外部解决 ls_x_val = abs(ls_x_val)-2 >= 0 ? ls_x_val+-2 : 0;
             if (LS_TOUCH_id != -1)
@@ -190,10 +177,11 @@ void LS_manager() //左摇杆
 int rs_x_val = 0, rs_y_val = 0;
 int rs_touch_start_x = 720, rs_touch_start_y = 1760;
 int rs_touch_last_x = -1, rs_touch_last_y = -1;
-int rs_frequency = 500;
+int rs_frequency = 5000;
 int rs_speedRatio = 1;
 void RS_manager() //右摇杆
 {
+    printf("RS_manager thread start\n");
     int RS_TOUCH_id = -1; //初始不按下
     rs_touch_last_x = rs_touch_start_x;
     rs_touch_last_y = rs_touch_start_y;
@@ -244,92 +232,142 @@ int km_map_id[256 + 8];      //键盘鼠标code 对应分配的ID 按下获取�
 int map_postion[256 + 8][2]; //映射的XY坐标
 struct input_event joystick_queue[16];
 int j_len = 0;
+
+int lt_last = 0, rt_last = 0;
+int HAT0X_last = 0, HAT0Y_last = 0;
+
+int js_btn_type[] = {BTN_A, BTN_B, BTN_X, BTN_Y, BTN_SELECT, BTN_TL, BTN_TR, BTN_THUMBL, BTN_THUMBR};
+
+void BTN_MANAGER(int keyCode, int updown)
+{
+    printf("[%d->%d]\n", keyCode, updown);
+    printf("(%d,%d)", map_postion[keyCode][0], map_postion[keyCode][1]);
+    if (map_postion[keyCode][0] && map_postion[keyCode][1])
+    { //映射坐标不为0 设定映射
+        if (updown == DOWN)
+            km_map_id[keyCode] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
+        else
+            touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
+    }
+}
+
 void handel_joystick_queue() // 注意  切换操作也在这里
 //然后 范围计算转换 也在这里完成
 //扳机按照数值不同 可以映射单独按键 需要记录last值以确定是进入范围还是离开范围
 {
-    // if (joystick_queue[0].type == EV_REL) ////鼠标移动
-    // {
-    //     if (mouse_touch_id == -1) //第一次移动  之后不再申请
-    //     {
-    //         mouse_touch_id = touch_dev_controler(REQURIE_FLAG, -1, mouse_Start_x, mouse_Start_y); //按下 获取ID 应该为0
-    //         realtive_x = mouse_Start_x;
-    //         realtive_y = mouse_Start_y; //相对X,Y
-    //         return;
-    //     }
-    //     int x = 0;
-    //     int y = 0;
-    //     if (j_len == 3) //为3 则必定是X,Y
-    //     {               //X和Y 顺序是固定的 先X 后y
-    //         x = joystick_queue[0].value;
-    //         y = joystick_queue[1].value;
-    //     }
-    //     else if (joystick_queue[0].code == REL_X)
-    //     { //单个 x或y
-    //         x = joystick_queue[0].value;
-    //     }
-    //     else if (joystick_queue[0].code == REL_Y)
-    //     {
-    //         y = joystick_queue[0].value;
-    //     }
-    //     else //这里可以处理滚轮事件
-    //     {
-    //         m_len = 0;
-    //         return;
-    //     }
-    //     realtive_x -= y * mouse_speedRatio;
-    //     realtive_y += x * mouse_speedRatio;
-    //     if (realtive_x < 0 || realtive_x > mouse_Start_x * 2 || realtive_y < 0 || realtive_y > (mouse_Start_y - 200) * 2)
-    //     {
-    //         touch_dev_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);                              //松开
-    //         mouse_touch_id = touch_dev_controler(REQURIE_FLAG, -1, mouse_Start_x, mouse_Start_y); //再按下
-    //         realtive_x = mouse_Start_x - y * mouse_speedRatio;
-    //         realtive_y = mouse_Start_y + x * mouse_speedRatio; //相对X,Y
-    //     }
-    //     touch_dev_controler(MOVE_FLAG, mouse_touch_id, realtive_x, realtive_y); //移动
-    // }
-    // else //按键
-    // {
-    //     for (int i = 0; i < j_len; i++)
-    //     {
-    //         if (joystick_queue[i].type == EV_KEY && joystick_queue[i].code > 256) //鼠标按键
-    //         {
-    //             int mouse_code = 256 + joystick_queue[i].code - BTN_MOUSE; //0x110为左键 -0x110获得鼠标按键偏移
-    //             if (joystick_queue[i].value == DOWN)
-    //             {
-    //                 km_map_id[mouse_code] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[mouse_code][0], map_postion[mouse_code][1]);
-    //             }
-    //             else if (joystick_queue[i].value == UP)
-    //             {
-    //                 touch_dev_controler(RELEASE_FLAG, km_map_id[mouse_code], 0, 0);
-    //             }
-    //         }
-    //         else if (joystick_queue[i].type == EV_KEY) //键盘按键
-    //         {
-    //             int keyCode = joystick_queue[i].code;
-    //             int updown = joystick_queue[i].value;
-    //             if (keyCode == KEY_GRAVE && updown == UP) //独占和非独占都关注 ` 用于切换状态  `键不响应键盘映射
-    //             {
-    //                 int tmp = Exclusive_mode_flag;
-    //                 Exclusive_mode_flag = no_Exclusive_mode_flag;
-    //                 no_Exclusive_mode_flag = tmp;
-    //             }
-    //             else if (Exclusive_mode_flag == 1)
-    //             {
-    //                 if (keyCode == KEY_W || keyCode == KEY_A || keyCode == KEY_S || keyCode == KEY_D) //方向键 额外处理
-    //                     change_wheel_satuse(keyCode, updown);
-    //                 else if (map_postion[keyCode][0] && map_postion[keyCode][1])
-    //                 { //映射坐标不为0 设定映射
-    //                     if (updown == DOWN)
-    //                         km_map_id[keyCode] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
-    //                     else
-    //                         touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // j_len = 0;
+    for (int i = 0; i < j_len - 1; i++)
+    {
+        if (joystick_queue[i].code == BTN_START && joystick_queue[i].value == UP)
+        {
+            int tmp = Exclusive_mode_flag;
+            Exclusive_mode_flag = no_Exclusive_mode_flag;
+            no_Exclusive_mode_flag = tmp;
+        }
+        else if (Exclusive_mode_flag == 1)
+        {
+            for (int j = 0; j < 9; j++)
+            {
+                if (joystick_queue[i].code == js_btn_type[j])
+                {
+                    if (joystick_queue[i].value == UP)
+                    {
+                        BTN_MANAGER(joystick_queue[i].code - 0x130, UP);
+                    }
+                    else
+                    {
+                        BTN_MANAGER(joystick_queue[i].code - 0x130, DOWN);
+                    }
+                }
+            }
+            if (joystick_queue[i].code == ABS_HAT0X)
+            {
+                int val = joystick_queue[i].value;
+                if (HAT0X_last == 0) //按下
+                {
+                    BTN_MANAGER(28 + val, DOWN);
+                }
+                if (val == 0) //释放
+                {
+                    BTN_MANAGER(28 + HAT0X_last, UP);
+                }
+                HAT0X_last = val;
+            }
+            else if (joystick_queue[i].code == ABS_HAT0Y)
+            {
+                int val = joystick_queue[i].value;
+                if (HAT0Y_last == 0) //按下
+                {
+                    BTN_MANAGER(25 + val, DOWN);
+                }
+                if (val == 0) //释放
+                {
+                    BTN_MANAGER(25 + HAT0Y_last, UP);
+                }
+                HAT0Y_last = val;
+            }
+            else if (joystick_queue[i].code == ABS_X)
+            {
+                ls_y_val = (joystick_queue[i].value - 128) * 2;
+            }
+            else if (joystick_queue[i].code == ABS_Y)
+            {
+                ls_x_val = (joystick_queue[i].value - 128) * -2;
+            }
+            else if (joystick_queue[i].code == ABS_Z)
+            {
+                rs_y_val = (joystick_queue[i].value - 128) / 8;
+            }
+            else if (joystick_queue[i].code == ABS_RZ)
+            {
+                rs_x_val = (joystick_queue[i].value - 128) / -8;
+            }
+            else if (joystick_queue[i].code == ABS_GAS)
+            {
+                int val = joystick_queue[i].value;
+                if (rt_last > 128 && val <= 128) //回弹
+                {
+                    BTN_MANAGER(20, UP);
+                }
+                else if (rt_last <= 128 && val > 128) //按下
+                {
+                    BTN_MANAGER(20, DOWN);
+                }
+
+                if (rt_last > 250 && val <= 250) //回弹
+                {
+                    BTN_MANAGER(21, UP);
+                }
+                else if (rt_last <= 250 && val > 250) //按下
+                {
+                    BTN_MANAGER(21, DOWN);
+                }
+                rt_last = val;
+            }
+            else if (joystick_queue[i].code == ABS_BRAKE)
+            {
+                int val = joystick_queue[i].value;
+                if (lt_last > 128 && val <= 128) //回弹
+                {
+                    BTN_MANAGER(22, UP);
+                }
+                else if (lt_last <= 128 && val > 128) //按下
+                {
+                    BTN_MANAGER(22, DOWN);
+                }
+
+                if (lt_last > 250 && val <= 250) //回弹
+                {
+                    BTN_MANAGER(23, UP);
+                }
+                else if (lt_last <= 250 && val > 250) //按下
+                {
+                    BTN_MANAGER(23, DOWN);
+                }
+                lt_last = val;
+            }
+        }
+    }
+    j_len = 0;
 }
 int no_Exclusive_mode_JoyStick()
 {
@@ -429,7 +467,7 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     }
     char buf[1024 * 8];      //配置文件大小最大8KB
     chdir(dirname(argv[0])); //设置当前目录为应用程序所在的目录
-    printf("Reading config from %s\n", argv[4]);
+    printf("Reading config from %s\n", argv[3]);
     FILE *fp = fopen(argv[3], "r");
     if (fp == NULL)
     {
@@ -461,7 +499,7 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     ls_touch_start_x = config[1][0];
     ls_touch_start_y = config[1][1];
     ls_move_Range = config[1][2];
-    for (int i = 9; i < linecount; i++)
+    for (int i = 2; i < linecount; i++)
     {
         map_postion[config[i][0]][0] = config[i][1];
         map_postion[config[i][0]][1] = config[i][2];
@@ -473,7 +511,7 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     }
 }
 
-int test_main()
+int tmain()
 {
     if (sem_init(&touch_dev_controler_sem_control, 0, 1) != 0)
     {
