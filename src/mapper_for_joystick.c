@@ -14,13 +14,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#define PRINT(a)                   \
-    do                             \
-    {                              \
-        printf("%s: %d\n", #a, a); \
-        printf("%d: %d\n", a, a);  \
-    } while (0)
-
 #define DOWN 0x1
 #define UP 0x0
 #define MOVE_FLAG 0x0
@@ -140,7 +133,7 @@ int ls_frequency = 5000;
 int ls_move_Range = 300;
 void LS_manager() //左摇杆
 {
-    int ls_touch_start_x = 600, ls_touch_start_y = 600;
+    // int ls_touch_start_x = 600, ls_touch_start_y = 600;
     printf("LS_manager thread start\n");
     int LS_TOUCH_id = -1;
     while (Exclusive_mode_flag)
@@ -236,12 +229,16 @@ int j_len = 0;
 int lt_last = 0, rt_last = 0;
 int HAT0X_last = 0, HAT0Y_last = 0;
 
-int js_btn_type[] = {BTN_A, BTN_B, BTN_X, BTN_Y, BTN_SELECT, BTN_TL, BTN_TR, BTN_THUMBL, BTN_THUMBR};
-
+int js_btn_type[] = {BTN_A, BTN_B, BTN_X, BTN_Y, BTN_SELECT, BTN_START, BTN_TL, BTN_TR, BTN_THUMBL, BTN_THUMBR};
+int key_stause[30];
 void BTN_MANAGER(int keyCode, int updown)
 {
-    printf("[%d->%d]\n", keyCode, updown);
-    printf("(%d,%d)", map_postion[keyCode][0], map_postion[keyCode][1]);
+    // printf("[%d->%d]\n", keyCode, updown);
+    // printf("(%d,%d)", map_postion[keyCode][0], map_postion[keyCode][1]);
+    if (key_stause[keyCode] == updown)
+        return;
+    else
+        key_stause[keyCode] = updown;
     if (map_postion[keyCode][0] && map_postion[keyCode][1])
     { //映射坐标不为0 设定映射
         if (updown == DOWN)
@@ -250,22 +247,26 @@ void BTN_MANAGER(int keyCode, int updown)
             touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
     }
 }
-
+int start_UP_DOWN = 0;
 void handel_joystick_queue() // 注意  切换操作也在这里
 //然后 范围计算转换 也在这里完成
 //扳机按照数值不同 可以映射单独按键 需要记录last值以确定是进入范围还是离开范围
 {
     for (int i = 0; i < j_len - 1; i++)
     {
-        if (joystick_queue[i].code == BTN_START && joystick_queue[i].value == UP)
+        if (joystick_queue[i].code == BTN_START)
+        {
+            start_UP_DOWN = joystick_queue[i].value;
+        }
+        if (start_UP_DOWN == DOWN && joystick_queue[i].code == BTN_THUMBR && joystick_queue[i].value == UP)
         {
             int tmp = Exclusive_mode_flag;
             Exclusive_mode_flag = no_Exclusive_mode_flag;
             no_Exclusive_mode_flag = tmp;
         }
-        else if (Exclusive_mode_flag == 1)
+        if (Exclusive_mode_flag == 1)
         {
-            for (int j = 0; j < 9; j++)
+            for (int j = 0; j < 10; j++)
             {
                 if (joystick_queue[i].code == js_btn_type[j])
                 {
@@ -305,7 +306,7 @@ void handel_joystick_queue() // 注意  切换操作也在这里
                 }
                 HAT0Y_last = val;
             }
-            else if (joystick_queue[i].code == ABS_X)
+            else if (joystick_queue[i].code == ABS_X) //横屏哈
             {
                 ls_y_val = (joystick_queue[i].value - 128) * 2;
             }
