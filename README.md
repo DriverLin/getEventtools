@@ -56,7 +56,18 @@ S用于定位摇杆中心
 
 W用于限制摇杆范围
 
-目前只支持WASD左摇杆+鼠标控制视角+按键映射点击位置
 
-等回学校了会添加对手柄的支持
+## 手柄部分
+mapper文件参照input.h填写
 
+键值为 ```REAL_KEYCODE - 0X130```
+
+select+RS切换
+
+## 手柄配置文件
+```
+startx starty moveSpeedRange //触摸起始 移动速度范围
+wheel_startx wheel_start_y moveRange //wheel起始 移动范围
+ID X Y //keycode-0X130 按下坐标
+ID X Y
+```

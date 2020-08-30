@@ -37,6 +37,11 @@ struct input_event POS_Y_EVENT = {.type = EV_ABS, .code = ABS_MT_POSITION_Y};   
 struct input_event DEFINE_UID_EVENT = {.type = EV_ABS, .code = ABS_MT_TRACKING_ID};          //声明识别ID 用于消除
 struct input_event BTN_DOWN_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = DOWN};      //按下 没有触摸点的时候使用
 struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = UP};          //释放 触摸点全部释放的时候使用
+
+int ABS_X_RANGE, ABS_Y_RANGE, ABS_Z_RANGE, ABS_RZ_RANGE, ABS_GAS_RANGE, ABS_BRAKE_RANGE; //线性摇杆范围
+int ABS_X_MID, ABS_Y_MID, ABS_Z_MID, ABS_RZ_MID, ABS_GAS_MID, ABS_BRAKE_MID;
+
+int deadband = 8;
 //type = 0,1,2 id = -1,.... ,x,y      ID为-1 则是按下，获取返回的ID，下次带上才可进行滑动或者释放操作
 //x,y为绝对坐标 越界重置也由外部完成
 //按下 移动 释放
@@ -229,7 +234,7 @@ int j_len = 0;
 int lt_last = 0, rt_last = 0;
 int HAT0X_last = 0, HAT0Y_last = 0;
 
-int js_btn_type[] = {BTN_A, BTN_B, BTN_X, BTN_Y, BTN_SELECT, BTN_START, BTN_TL, BTN_TR, BTN_THUMBL, BTN_THUMBR};
+int js_btn_type[] = {BTN_A, BTN_B, BTN_X, BTN_Y, KEY_BACK, BTN_SELECT, BTN_START, BTN_TL, BTN_TR, BTN_THUMBL, BTN_THUMBR};
 int key_stause[30];
 void BTN_MANAGER(int keyCode, int updown)
 {
@@ -247,18 +252,19 @@ void BTN_MANAGER(int keyCode, int updown)
             touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
     }
 }
-int start_UP_DOWN = 0;
+int select_UP_DOWN = 0;
 void handel_joystick_queue() // 注意  切换操作也在这里
 //然后 范围计算转换 也在这里完成
 //扳机按照数值不同 可以映射单独按键 需要记录last值以确定是进入范围还是离开范围
 {
+    // printf("ev\n");
     for (int i = 0; i < j_len - 1; i++)
     {
-        if (joystick_queue[i].code == BTN_START)
+        if (joystick_queue[i].code == KEY_BACK || joystick_queue[i].code == BTN_SELECT)
         {
-            start_UP_DOWN = joystick_queue[i].value;
+            select_UP_DOWN = joystick_queue[i].value;
         }
-        if (start_UP_DOWN == DOWN && joystick_queue[i].code == BTN_THUMBR && joystick_queue[i].value == UP)
+        if (select_UP_DOWN == DOWN && joystick_queue[i].code == BTN_THUMBR && joystick_queue[i].value == UP)
         {
             int tmp = Exclusive_mode_flag;
             Exclusive_mode_flag = no_Exclusive_mode_flag;
@@ -266,17 +272,18 @@ void handel_joystick_queue() // 注意  切换操作也在这里
         }
         if (Exclusive_mode_flag == 1)
         {
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < 11; j++)
             {
                 if (joystick_queue[i].code == js_btn_type[j])
                 {
+                    int keycode = joystick_queue[i].code == KEY_BACK ? BTN_SELECT : joystick_queue[i].code;
                     if (joystick_queue[i].value == UP)
                     {
-                        BTN_MANAGER(joystick_queue[i].code - 0x130, UP);
+                        BTN_MANAGER(keycode - 0x130, UP);
                     }
                     else
                     {
-                        BTN_MANAGER(joystick_queue[i].code - 0x130, DOWN);
+                        BTN_MANAGER(keycode - 0x130, DOWN);
                     }
                 }
             }
@@ -306,39 +313,51 @@ void handel_joystick_queue() // 注意  切换操作也在这里
                 }
                 HAT0Y_last = val;
             }
-            else if (joystick_queue[i].code == ABS_X) //横屏哈
+            else if (joystick_queue[i].code == ABS_X) //横屏 XY互换了 做其他作用记得换回来
             {
-                ls_y_val = (joystick_queue[i].value - 128) * 2;
+                ls_y_val = (joystick_queue[i].value - ABS_Y_MID);
+                if (ls_y_val < ABS_Y_RANGE / deadband && ls_y_val > -1 * ABS_Y_RANGE / deadband) //死区 1/16
+                    ls_y_val = 0;
+                ls_y_val = ls_y_val * ls_move_Range / (ABS_Y_RANGE / 2);
             }
             else if (joystick_queue[i].code == ABS_Y)
             {
-                ls_x_val = (joystick_queue[i].value - 128) * -2;
-            }
-            else if (joystick_queue[i].code == ABS_Z)
-            {
-                rs_y_val = (joystick_queue[i].value - 128) / 8;
+                ls_x_val = (ABS_X_MID - joystick_queue[i].value);
+                if (ls_x_val < ABS_X_RANGE / deadband && ls_x_val > -1 * ABS_X_RANGE / deadband) //死区 1/16
+                    ls_x_val = 0;
+                ls_x_val = ls_x_val * ls_move_Range / (ABS_X_RANGE / 2);
             }
             else if (joystick_queue[i].code == ABS_RZ)
             {
-                rs_x_val = (joystick_queue[i].value - 128) / -8;
+                rs_x_val = (ABS_Z_MID - joystick_queue[i].value);
+                if (rs_x_val < ABS_Z_RANGE / deadband && rs_x_val > -1 * ABS_Z_RANGE / deadband) //死区 1/16
+                    rs_x_val = 0;
+                rs_x_val = rs_x_val * rs_speedRatio / (ABS_Z_RANGE / 2);
+            }
+            else if (joystick_queue[i].code == ABS_Z)
+            {
+                rs_y_val = (joystick_queue[i].value - ABS_RZ_MID);
+                if (rs_y_val < ABS_RZ_RANGE / deadband && rs_y_val > -1 * ABS_RZ_RANGE / deadband) //死区 1/16
+                    rs_y_val = 0;
+                rs_y_val = rs_y_val * rs_speedRatio / (ABS_RZ_RANGE / 2);
             }
             else if (joystick_queue[i].code == ABS_GAS)
             {
                 int val = joystick_queue[i].value;
-                if (rt_last > 128 && val <= 128) //回弹
+                if (rt_last > ABS_GAS_MID && val <= ABS_GAS_MID) //回弹
                 {
                     BTN_MANAGER(20, UP);
                 }
-                else if (rt_last <= 128 && val > 128) //按下
+                else if (rt_last <= ABS_GAS_MID && val > ABS_GAS_MID) //按下
                 {
                     BTN_MANAGER(20, DOWN);
                 }
 
-                if (rt_last > 250 && val <= 250) //回弹
+                if (rt_last > (ABS_GAS_MID + ABS_GAS_RANGE / 2 - 10) && val <= (ABS_GAS_MID + ABS_GAS_RANGE / 2 - 10)) //回弹
                 {
                     BTN_MANAGER(21, UP);
                 }
-                else if (rt_last <= 250 && val > 250) //按下
+                else if (rt_last <= (ABS_GAS_MID + ABS_GAS_RANGE / 2 - 10) && val > (ABS_GAS_MID + ABS_GAS_RANGE / 2 - 10)) //按下
                 {
                     BTN_MANAGER(21, DOWN);
                 }
@@ -347,20 +366,20 @@ void handel_joystick_queue() // 注意  切换操作也在这里
             else if (joystick_queue[i].code == ABS_BRAKE)
             {
                 int val = joystick_queue[i].value;
-                if (lt_last > 128 && val <= 128) //回弹
+                if (lt_last > ABS_BRAKE_MID && val <= ABS_BRAKE_MID) //回弹
                 {
                     BTN_MANAGER(22, UP);
                 }
-                else if (lt_last <= 128 && val > 128) //按下
+                else if (lt_last <= ABS_BRAKE_MID && val > ABS_BRAKE_MID) //按下
                 {
                     BTN_MANAGER(22, DOWN);
                 }
 
-                if (lt_last > 250 && val <= 250) //回弹
+                if (lt_last > (ABS_BRAKE_MID + ABS_BRAKE_RANGE / 2 - 10) && val <= (ABS_BRAKE_MID + ABS_BRAKE_RANGE / 2 - 10)) //回弹
                 {
                     BTN_MANAGER(23, UP);
                 }
-                else if (lt_last <= 250 && val > 250) //按下
+                else if (lt_last <= (ABS_BRAKE_MID + ABS_BRAKE_RANGE / 2 - 10) && val > (ABS_BRAKE_MID + ABS_BRAKE_RANGE / 2 - 10)) //按下
                 {
                     BTN_MANAGER(23, DOWN);
                 }
@@ -450,8 +469,90 @@ int Exclusive_mode_JoyStick()
     return 0;
 }
 
+int getABSRange(int fd)
+{
+    uint8_t *bits = NULL;
+    ssize_t bits_size = 0;
+    const char *label;
+    int i, j, k;
+    int res, res2;
+    struct label *bit_labels;
+    const char *bit_label;
+    for (i = EV_KEY; i <= EV_MAX; i++)
+    { // skip EV_SYN since we cannot query its available codes
+        int count = 0;
+        while (1)
+        {
+            res = ioctl(fd, EVIOCGBIT(i, bits_size), bits);
+            if (res < bits_size)
+                break;
+            bits_size = res + 16;
+            bits = realloc(bits, bits_size * 2);
+            if (bits == NULL)
+            {
+                fprintf(stderr, "failed to allocate buffer of size %d\n", (int)bits_size);
+                return 1;
+            }
+        }
+        res2 = 0;
+        for (j = 0; j < res; j++)
+        {
+            for (k = 0; k < 8; k++)
+                if (bits[j] & 1 << k)
+                {
+                    int ABS_ID = j * 8 + k;
+                    if (i == EV_ABS)
+                    {
+                        struct input_absinfo abs;
+                        if (ioctl(fd, EVIOCGABS(j * 8 + k), &abs) == 0)
+                        {
+                            if (ABS_ID == ABS_X)
+                            {
+                                ABS_X_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_X_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            else if (ABS_ID == ABS_Y)
+                            {
+                                ABS_Y_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_Y_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            else if (ABS_ID == ABS_Z)
+                            {
+                                ABS_Z_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_Z_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            else if (ABS_ID == ABS_RZ)
+                            {
+                                ABS_RZ_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_RZ_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            else if (ABS_ID == ABS_GAS)
+                            {
+                                ABS_GAS_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_GAS_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            else if (ABS_ID == ABS_BRAKE)
+                            {
+                                ABS_BRAKE_RANGE = abs.maximum + 1 - abs.minimum;
+                                ABS_BRAKE_MID = (abs.maximum + 1 - abs.minimum) / 2;
+                            }
+                            printf("%04x: value %d, min %d, max %d, fuzz %d, flat %d, resolution %d\n", ABS_ID, abs.value, abs.minimum, abs.maximum + 1, abs.fuzz, abs.flat,
+                                   abs.resolution);
+                        }
+                    }
+                    count++;
+                }
+        }
+        if (count)
+            printf("\n");
+    }
+    free(bits);
+    return 0;
+}
+
 int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备号 mapper映射文件路径 首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
+    printf("running\n");
     int touch_dev_num = atoi(argv[1]);
     int joystick_dev_num = atoi(argv[2]);
 
@@ -496,59 +597,23 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
 
     rs_touch_start_x = config[0][0];
     rs_touch_start_y = config[0][1];
-    rs_speedRatio = config[0][2];
+    rs_speedRatio = config[0][2]; //REL_VAL / Ratio
     ls_touch_start_x = config[1][0];
     ls_touch_start_y = config[1][1];
-    ls_move_Range = config[1][2];
+    ls_move_Range = config[1][2]; //坐标范围
     for (int i = 2; i < linecount; i++)
     {
         map_postion[config[i][0]][0] = config[i][1];
         map_postion[config[i][0]][1] = config[i][2];
     }
+
+    int joystick_dev_fd = open(joystick_dev_path, O_RDONLY | O_NONBLOCK);
+    getABSRange(joystick_dev_fd);
+    close(joystick_dev_fd);
+    // return 1;
     while (1)
     {
         no_Exclusive_mode_JoyStick();
-        Exclusive_mode_JoyStick(); //记得先插鼠标 再插键盘
+        Exclusive_mode_JoyStick();
     }
-}
-
-int tmain()
-{
-    if (sem_init(&touch_dev_controler_sem_control, 0, 1) != 0)
-    {
-        perror("Fail to touch_dev_controler_sem_control init");
-        exit(-1);
-    }
-    sprintf(touch_dev_path, "/dev/input/event%d", 5);
-    touch_fd = open(touch_dev_path, O_RDWR);
-    if (touch_fd < 0)
-    {
-        fprintf(stderr, "could not open touchScreen\n");
-        return 1;
-    }
-    Exclusive_mode_flag = 1;
-    pthread_t rs_manager_thread;
-    pthread_create(&rs_manager_thread, NULL, (void *)&RS_manager, NULL);
-
-    pthread_t ls_manager_thread;
-    pthread_create(&ls_manager_thread, NULL, (void *)&LS_manager, NULL);
-
-    int offset = 10;
-    // ls_y_val += offset;
-    while (1)
-    {
-        ls_y_val += offset;
-        ls_x_val += offset;
-        if (ls_y_val > 400)
-        {
-            offset = -10;
-        }
-        if ((ls_y_val < -400))
-        {
-            offset = 10;
-        }
-        usleep(5000);
-        // printf("%d\n", rs_x_val);
-    }
-    return 0;
 }

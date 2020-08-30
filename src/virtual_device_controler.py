@@ -46,8 +46,9 @@ def onMouseEvent(event):
         start_x, start_y = event.Position
         return False
     currentx, currenty = event.Position
-    relativeX = currentx - start_x
-    relativeY = currenty - start_y
+    relativeX = (currentx - start_x)
+    relativeY = (currenty - start_y)
+    print("\r",relativeX,relativeY);
     if(relativeX != 0 or relativeY != 0):
         udpSocket.sendto(str((100000000+relativeX*10000) % 100000000 +
                              (relativeY+10000) % 10000).encode('utf-8'), sendArr)
