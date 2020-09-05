@@ -536,8 +536,8 @@ int getABSRange(int fd)
                                 ABS_BRAKE_RANGE = abs.maximum + 1 - abs.minimum;
                                 ABS_BRAKE_MID = (abs.maximum + 1 - abs.minimum) / 2;
                             }
-                            printf("%04x: value %d, min %d, max %d, fuzz %d, flat %d, resolution %d\n", ABS_ID, abs.value, abs.minimum, abs.maximum + 1, abs.fuzz, abs.flat,
-                                   abs.resolution);
+                            // printf("%04x: value %d, min %d, max %d, fuzz %d, flat %d, resolution %d\n", ABS_ID, abs.value, abs.minimum, abs.maximum + 1, abs.fuzz, abs.flat,
+                            //        abs.resolution);
                         }
                     }
                     count++;
@@ -610,7 +610,6 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     int joystick_dev_fd = open(joystick_dev_path, O_RDONLY | O_NONBLOCK);
     getABSRange(joystick_dev_fd);
     close(joystick_dev_fd);
-    // return 1;
     while (1)
     {
         no_Exclusive_mode_JoyStick();

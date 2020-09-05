@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./jquery-1.7.2.js"></script>
+    <script src="./out.js"></script>
+    <script type="text/javascript">
+        var running = false;
+        var i = 0;
+        function nextOne() {
+            console.log(data[i])
+            var type = data[i][0]
+            var uid = data[i][1]
+            var x = data[i][2]
+            var y = data[i][3]
+            var tid = data[i][4]
+            if (type == 1 || type == 3 || type == 4) {
+                $('body').append(`<div class="touch" id=${tid} style="margin-left: ${y / 2}px;margin-top: ${720 - x / 2}px;" />`)
+            }
+            else if (type == 0) {
+                $("#" + uid).css({
+                    "margin-left": y / 2,
+                    "margin-top": 720 - x / 2
+                })
+            } else if (type == 2) {
+                $("#" + uid).remove();
+            }
+            i++;
+        }
+        function preOne() {
+            i--;
+            console.log(data[i])
+            var type = data[i][0]
+            var uid = data[i][1]
+            var x = data[i][2]
+            var y = data[i][3]
+            var tid = data[i][4]
+            if (type == 1 || type == 3 || type == 4) {
+                $("#" + tid).remove();
+            }
+            else if (type == 0) {
+                $("#" + uid).css({
+                    "margin-left": y / 2,
+                    "margin-top": 720 - x / 2
+                })
+            } else if (type == 2) {
+                $('body').append(`<div class="touch" id=${tid} style="margin-left: ${y / 2}px;margin-top: ${720 - x / 2}px;" />`)
+            }
+
+        }
+
+        var loopingNext = false
+        var loopingPrev = false
+
+        function loopNext() {
+
+            for (var i = 0; i < 8; i++) {
+                nextOne()
+            }
+            setTimeout(() => {
+                if (loopingNext) {
+                    loopNext()
+                }
+            }, 1)
+        }
+        function loopPrev() {
+            for (var i = 0; i < 8; i++) {
+                preOne()
+            }
+            setTimeout(() => {
+                if (loopingPrev) {
+                    loopPrev()
+                }
+            }, 1)
+        }
+
+
+        document.onkeydown = function (event) {
+            if (running) {
+                console.log("running")
+                return
+            }
+            running = true
+
+            // console.log(event.keyCode)
+
+            if (event.keyCode == 83) {
+                if (loopingNext) {
+                    loopingNext = false
+                } else {
+                    loopingNext = true
+                    loopNext()
+                }
+
+            }
+            else if (event.keyCode == 80) {
+                if (loopingPrev) {
+                    loopingPrev = false
+                } else {
+                    loopingPrev = true
+                    loopPrev()
+                }
+            }
+            else if (event.keyCode == 39) {
+                if (i >= data.length) {
+                    running = false
+                    return
+                }
+                nextOne()
+            }
+            else if (event.keyCode == 37) {
+                if (i <= 0) {
+                    running = false
+                    return
+                }
+                preOne()
+            }
+            else if (event.keyCode == 221) {
+                for (var counter = 0; counter < 8; counter++) {
+                    if (i >= data.length) {
+                        running = false
+                        return
+                    }
+                    nextOne()
+                }
+
+            }
+            else if (event.keyCode == 219) {
+                for (var counter = 0; counter < 8; counter++) {
+                    if (i <= 0) {
+                        running = false
+                        return
+                    }
+                    preOne()
+                }
+            }
+            running = false
+
+        }
+    </script>
+</head>
+
+
+<style type="text/css">
+    .touch {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: #2C3A47;
+        border-radius: 10px;
+        /* transition: 0.01s; */
+    }
+
+    .phoneScreen {
+        position: absolute;
+        border: 2px solid black;
+        width: 1560px;
+        height: 720px;
+    }
+</style>
+
+<body>
+    <div class="phoneScreen"></div>
+</body>
+
+</html>

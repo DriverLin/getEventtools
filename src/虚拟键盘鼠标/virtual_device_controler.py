@@ -2,9 +2,9 @@ import PyHook3
 import pythoncom
 import socket
 import time
-
+import _thread
 udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sendArr = ('192.168.137.2', 8848)
+sendArr = ('127.0.0.1', 8848)
 
 key_stause = [False for x in range(256)]
 
@@ -35,9 +35,12 @@ start_x, start_y = -1, -1
 firstFlag = True
 relativeX, relativeY = 0, 0
 
+mulx = 0
+muly = 0
+
 
 def onMouseEvent(event):
-    global start_x, start_y, firstFlag, Exclusive_mode
+    global start_x, start_y, firstFlag, Exclusive_mode, mulx, muly
     if Exclusive_mode == False:
         start_x, start_y = event.Position
         return True
@@ -48,6 +51,9 @@ def onMouseEvent(event):
     currentx, currenty = event.Position
     relativeX = (currentx - start_x)
     relativeY = (currenty - start_y)
+    mulx += relativeX
+    muly += relativeY
+    # print(mulx, muly)
     # print("\r",relativeX,relativeY);
     if(relativeX != 0 or relativeY != 0):
         udpSocket.sendto(str((100000000+relativeX*10000) % 100000000 +
@@ -67,6 +73,28 @@ def onMouseEvent(event):
     return False
 
 
+lastMul = (0, 0)
+lastSpeed = (0, 0)
+
+
+def tojs():
+    return False
+    global lastMul, lastSpeed
+    while True:
+        time.sleep(0.001)
+        v_x = mulx - lastMul[0]
+        v_y = muly - lastMul[1]
+        if (v_x, v_y) == lastSpeed:
+            continue
+        else:
+            lastMul = (mulx, muly)
+            lastSpeed = (v_x, v_y)
+            print(v_x, v_y)
+            udpSocket.sendto(str((100000000+v_x*10000) % 100000000 +
+                                 (v_y+10000) % 10000).encode('utf-8'), sendArr)
+    pass
+
+
 def main():
     hm = PyHook3.HookManager()
     hm.KeyDown = onKeyboardEvent
@@ -74,6 +102,7 @@ def main():
     hm.HookKeyboard()
     hm.MouseAll = onMouseEvent
     hm.HookMouse()
+    _thread.start_new_thread(tojs, ())
     pythoncom.PumpMessages()
 
 

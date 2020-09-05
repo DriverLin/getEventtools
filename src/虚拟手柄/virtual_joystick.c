@@ -8,10 +8,13 @@
 #include <linux/uinput.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+
+int fd;
+
 int reveive_from_UDP(int port)
 {
     int sin_len;
-    char message[16];
+    unsigned char message[6];
     int socket_descriptor;
     struct sockaddr_in sin;
     bzero(&sin, sizeof(sin));
@@ -23,52 +26,65 @@ int reveive_from_UDP(int port)
     bind(socket_descriptor, (struct sockaddr *)&sin, sizeof(sin));
     while (1)
     {
-        memset(message, '\0', 16);
+        memset(message, '\0', 6);
         recvfrom(socket_descriptor, message, sizeof(message), 0, (struct sockaddr *)&sin, &sin_len);
-        // printf("%s\n", message);
         if (!strcmp(message, "end")) //发送END  结束
             return 0;
-        int code = atoi(message); //编码格式  移动/按下/释放- valueX-valueY / CODE
-        int type = code / 100000000;
-        code %= 100000000;
-        switch (type)
+        int code = message[0] * 0x100 + message[1];
+        switch (code)
         {
-        case 0: //移动
+        case ABS_Z: //包括 ZR : code,x,y  0~65535
         {
-            int mouse_x = code / 10000;
-            int mouse_y = code % 10000;
-            if (mouse_x > 5000)
-            {
-                mouse_x -= 10000;
-            }
-            if (mouse_y > 5000)
-            {
-                mouse_y -= 10000;
-            }
-            repreport_mouse_move(mouse_x, mouse_y);
-            // printf("移动,x=%d,%y=%d\n", mouse_x, mouse_y);
+            struct input_event X_EVENT = {.type = EV_ABS, .code = REL_Z, .value = message[2] * 0x100 + message[3]};
+            struct input_event Y_EVENT = {.type = EV_ABS, .code = REL_RZ, .value = message[4] * 0x100 + message[5]};
+            struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
+            write(fd, &X_EVENT, sizeof(struct input_event));
+            write(fd, &Y_EVENT, sizeof(struct input_event));
+            write(fd, &SYNC_EVENT, sizeof(struct input_event));
             break;
         }
-        case 1:
+        case ABS_X: //包括Y: code,x,y  0~65535
         {
-            report_key(code, 1);
-            // printf("按下,%d\n", code);
+            struct input_event X_EVENT = {.type = EV_ABS, .code = REL_X, .value = message[2] * 0x100 + message[3]};
+            struct input_event Y_EVENT = {.type = EV_ABS, .code = REL_Y, .value = message[4] * 0x100 + message[5]};
+            struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
+            write(fd, &X_EVENT, sizeof(struct input_event));
+            write(fd, &Y_EVENT, sizeof(struct input_event));
+            write(fd, &SYNC_EVENT, sizeof(struct input_event));
             break;
         }
-        case 2:
+        case ABS_BRAKE: //: code,value 0~65535
+        case ABS_GAS:
         {
-            report_key(code, 0);
-            // printf("释放,%d\n", code);
+            struct input_event VALUE = {.type = EV_ABS, .code = code, .value = message[2] * 0x100 + message[3]};
+            struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
+            write(fd, &VALUE, sizeof(struct input_event));
+            write(fd, &SYNC_EVENT, sizeof(struct input_event));
             break;
         }
-        default:
+        case ABS_HAT0X:
+        case ABS_HAT0Y: // code,value 0~2
+        {
+            struct input_event VALUE = {.type = EV_ABS, .code = code, .value = message[3] - 1};
+            struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
+            write(fd, &VALUE, sizeof(struct input_event));
+            write(fd, &SYNC_EVENT, sizeof(struct input_event));
             break;
+        }
+        default: //KEY_EVENT code,value 0|1
+        {
+            struct input_event EV_KEY_EVENT = {.type = EV_KEY, .code = code, .value = message[3]};
+            struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
+            write(fd, &EV_KEY_EVENT, sizeof(struct input_event));
+            write(fd, &SYNC_EVENT, sizeof(struct input_event));
+            break;
+        }
         }
     }
     close(socket_descriptor);
     return 0;
 }
-int fd;
+
 int main(void)
 {
     fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK); //opening of uinput
@@ -85,7 +101,7 @@ int main(void)
     ioctl(fd, UI_SET_KEYBIT, BTN_WEST);    //Y
     ioctl(fd, UI_SET_KEYBIT, BTN_TL);      //LB
     ioctl(fd, UI_SET_KEYBIT, BTN_TR);      //RB
-    ioctl(fd, UI_SET_KEYBIT, KEY_BACK);    //BACL
+    ioctl(fd, UI_SET_KEYBIT, BTN_SELECT);  //SELECT
     ioctl(fd, UI_SET_KEYBIT, BTN_START);   //START
     ioctl(fd, UI_SET_KEYBIT, BTN_THUMBL);  //LS
     ioctl(fd, UI_SET_KEYBIT, BTN_THUMBR);  //RS
@@ -152,25 +168,5 @@ int main(void)
         return 1;
     }
     close(fd);
-    return 0;
-}
-
-int report_key(unsigned int keycode, unsigned int value)
-{
-    // struct input_event EV_KEY_EVENT = {.type = EV_KEY, .code = keycode, .value = value};
-    // struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
-    // write(fd, &EV_KEY_EVENT, sizeof(struct input_event));
-    // write(fd, &SYNC_EVENT, sizeof(struct input_event));
-    return 0;
-}
-
-int repreport_mouse_move(unsigned int x, unsigned int y)
-{
-    struct input_event REL_X_EVENT = {.type = EV_ABS, .code = ABS_Z, .value = x * 0xff + 0xffff / 2};
-    struct input_event REL_Y_EVENT = {.type = EV_ABS, .code = ABS_RZ, .value = y * 0xff + 0xffff / 2};
-    struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};
-    write(fd, &REL_X_EVENT, sizeof(struct input_event));
-    write(fd, &REL_Y_EVENT, sizeof(struct input_event));
-    write(fd, &SYNC_EVENT, sizeof(struct input_event));
     return 0;
 }
