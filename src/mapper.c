@@ -262,7 +262,7 @@ void handelEventQueue()              //处理所有事件
             int tmp = Exclusive_mode_flag;
             Exclusive_mode_flag = no_Exclusive_mode_flag;
             no_Exclusive_mode_flag = tmp;
-            return;
+            break;
         }
         if (Exclusive_mode_flag)
         {
