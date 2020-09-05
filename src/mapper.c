@@ -14,6 +14,8 @@
 #include <semaphore.h>
 #include <pthread.h>
 
+#define DEBUG 0
+
 #define DOWN 0x1
 #define UP 0x0
 #define MOVE_FLAG 0x0
@@ -64,6 +66,7 @@ sem_t touch_dev_controler_sem_control;
 int touch_dev_controler(int type, int unclear_id, int x, int y)
 {
     sem_wait(&touch_dev_controler_sem_control);
+
     int id = unclear_id;
     if ((type == MOVE_FLAG) && (id != -1)) //移动:  切换ID,X,Y,同步 编码格式 "0 id x y"
     {
@@ -98,13 +101,9 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
     else if (type == MOUSE_REQUIRE || type == WHEEL_REQUIRE || type == REQURIE_FLAG)
     { //按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 * x y"
         if (type == MOUSE_REQUIRE)
-        {
             id = 0;
-        }
         else if (type == WHEEL_REQUIRE)
-        {
             id = 1;
-        }
         else
         {
             for (int i = 2; i < 10; i++) // 0 1 保留给鼠标移动和方向控制
@@ -112,7 +111,6 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
                 if (touch_id[i] == 0) //找寻一个空的
                 {
                     id = i; //分配id
-
                     break;
                 }
             }
@@ -136,6 +134,11 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
             write(touch_fd, &SYNC_EVENT, sizeof(SYNC_EVENT));
         }
     }
+    if (DEBUG == 1)
+    {
+        printf("[%d,%d,%d,%d,%d]\n", type, unclear_id, x, y, id);
+    }
+
     sem_post(&touch_dev_controler_sem_control);
     return id;
 }
@@ -155,8 +158,8 @@ int wheel_postion[9][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0
 int wheel_touch_id = -1;
 int cur_x = 0, cur_y = 0; //当前位置
 int tar_x = 0, tar_y = 0; //目标位置
-int move_speed = 10;      //方向移动速度
-int frequency = 500;      //方向移动频率 关系到相应方向键速度
+int move_speed = 60;      //方向移动速度
+int frequency = 5000;     //方向移动频率 关系到相应方向键速度
 int release_flag = 0;     //确保释放操作只执行一次
 void wheel_manager()
 {
@@ -259,7 +262,7 @@ void handelEventQueue()              //处理所有事件
             int tmp = Exclusive_mode_flag;
             Exclusive_mode_flag = no_Exclusive_mode_flag;
             no_Exclusive_mode_flag = tmp;
-            break;
+            return;
         }
         if (Exclusive_mode_flag)
         {
@@ -288,7 +291,6 @@ void handelEventQueue()              //处理所有事件
     }
     if (Exclusive_mode_flag == 1 && (x != 0 || y != 0))
     { //有鼠标事件
-
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
         if (mouse_touch_id == -1 || realtive_x < 32 || realtive_x > mouse_Start_x * 2 - 32 || realtive_y < 32 || realtive_y > (mouse_Start_y - 200) * 2 - 32)
@@ -354,31 +356,13 @@ int Exclusive_mode()
         {
             single_queue[s_len++] = mouse_event;
             if (mouse_event.type == 0 && mouse_event.code == 0 && mouse_event.value == 0)
-            {
                 handelEventQueue();
-            }
-
-            // Mouse_queue[m_len] = mouse_event;
-            // m_len++;
-            // if (mouse_event.type == 0 && mouse_event.code == 0 && mouse_event.value == 0)
-            // {
-            //     handel_Mouse_queue(); //同步信号 转处理
-            // }
         }
         if (read(keyboard_fd, &keyboard_event, sizeof(keyboard_event)) != -1)
         {
             single_queue[s_len++] = keyboard_event;
             if (keyboard_event.type == 0 && keyboard_event.code == 0 && keyboard_event.value == 0)
-            {
                 handelEventQueue();
-            }
-
-            // Keyboard_queue[k_len] = keyboard_event;
-            // k_len++;
-            // if (keyboard_event.type == 0 && keyboard_event.code == 0 && keyboard_event.value == 0)
-            // {
-            //     handel_Keyboard_queue();
-            // }
         }
     }
 
@@ -459,10 +443,8 @@ int Exclusive_mode_single_Dev_Version()
     tar_y = cur_y; //管理器位置重置
     for (int i = 0; i < 10; i++)
         if (touch_id[i] != 0)
-        {
-            usleep(50000);
             touch_dev_controler(RELEASE_FLAG, i, 0, 0);
-        } //释放所有按键
+    //释放所有按键
     realtive_x = mouse_Start_x;
     realtive_y = mouse_Start_y; //相对X,Y
     wheel_touch_id = -1;
@@ -491,9 +473,7 @@ int no_Exclusive_mode()
         {
             single_queue[s_len++] = keyboard_event;
             if (keyboard_event.type == 0 && keyboard_event.code == 0 && keyboard_event.value == 0)
-            {
                 handelEventQueue();
-            }
         }
     printf("Exiting.\n");
     close(keyboard_fd);
