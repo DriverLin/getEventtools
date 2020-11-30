@@ -13,6 +13,7 @@
 #include <libgen.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 #define DEBUG 0
 
@@ -45,13 +46,13 @@ int k_len = 0;                         //键盘队列长度
 int touch_id[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int allocatedID_num = 0;
 
-struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};          //同步 最常用的 直接用
-struct input_event SWITCH_ID_EVENT = {.type = EV_ABS, .code = ABS_MT_SLOT, .value = 0xffff}; //切换触摸点 修改value再用
-struct input_event POS_X_EVENT = {.type = EV_ABS, .code = ABS_MT_POSITION_X};                //X坐标
-struct input_event POS_Y_EVENT = {.type = EV_ABS, .code = ABS_MT_POSITION_Y};                //Y坐标
-struct input_event DEFINE_UID_EVENT = {.type = EV_ABS, .code = ABS_MT_TRACKING_ID};          //声明识别ID 用于消除
-struct input_event BTN_DOWN_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = DOWN};      //按下 没有触摸点的时候使用
-struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = UP};          //释放 触摸点全部释放的时候使用
+struct input_event SYNC_EVENT = {.type = EV_SYN, .code = SYN_REPORT, .value = 0x0};              //同步 最常用的 直接用
+struct input_event SWITCH_ID_EVENT = {.type = EV_ABS, .code = ABS_MT_SLOT, .value = 0xffffffff}; //切换触摸点 修改value再用
+struct input_event POS_X_EVENT = {.type = EV_ABS, .code = ABS_MT_POSITION_X};                    //X坐标
+struct input_event POS_Y_EVENT = {.type = EV_ABS, .code = ABS_MT_POSITION_Y};                    //Y坐标
+struct input_event DEFINE_UID_EVENT = {.type = EV_ABS, .code = ABS_MT_TRACKING_ID};              //声明识别ID 用于消除
+struct input_event BTN_DOWN_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = DOWN};          //按下 没有触摸点的时候使用
+struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = UP};              //释放 触摸点全部释放的时候使用
 //type = 0,1,2 id = -1,.... ,x,y      ID为-1 则是按下，获取返回的ID，下次带上才可进行滑动或者释放操作
 //x,y为绝对坐标 越界重置也由外部完成
 //按下 移动 释放
@@ -63,8 +64,10 @@ struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = U
 //鼠标的映射 鼠标一开始就占一个 切换后才释放 是申请还是移动 在外边判断
 //由于多线程 保证安全加上PV
 sem_t touch_dev_controler_sem_control;
+bool mouse_touch_allocater = true; //鼠标每次越界重新分配ID 0/1 尝试解决视角问题
 int touch_dev_controler(int type, int unclear_id, int x, int y)
 {
+
     sem_wait(&touch_dev_controler_sem_control);
 
     int id = unclear_id;
@@ -101,12 +104,15 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
     else if (type == MOUSE_REQUIRE || type == WHEEL_REQUIRE || type == REQURIE_FLAG)
     { //按下： 切换ID，uid=自定义，x，y，同步 编码格式 "1 * x y"
         if (type == MOUSE_REQUIRE)
-            id = 0;
+        {
+            id = mouse_touch_allocater ? 0 : 1;
+            mouse_touch_allocater = !mouse_touch_allocater;
+        }
         else if (type == WHEEL_REQUIRE)
-            id = 1;
+            id = 2;
         else
         {
-            for (int i = 2; i < 10; i++) // 0 1 保留给鼠标移动和方向控制
+            for (int i = 3; i < 10; i++) // 0 1 保留给鼠标移动和方向控制
             {
                 if (touch_id[i] == 0) //找寻一个空的
                 {
@@ -120,7 +126,7 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
             touch_id[id] = 1; //记录此置位已占用
             allocatedID_num++;
             SWITCH_ID_EVENT.value = id;
-            DEFINE_UID_EVENT.value = 0xe2 + SWITCH_ID_EVENT.value;
+            DEFINE_UID_EVENT.value = id;
             POS_X_EVENT.value = x;
             POS_Y_EVENT.value = y;
             write(touch_fd, &SWITCH_ID_EVENT, sizeof(SWITCH_ID_EVENT));
@@ -136,16 +142,19 @@ int touch_dev_controler(int type, int unclear_id, int x, int y)
     }
     if (DEBUG == 1)
     {
-        printf("[%d,%d,%d,%d,%d]\n", type, unclear_id, x, y, id);
+        // printf("[%d,%d,%d,%d,%d]\n", type, unclear_id, x, y, id);
+        printf("[type=%d\t,ucid=%d\t,x=%d\t,y=%d\t,allocated id=%d]\n", type, unclear_id, x, y, id);
     }
 
     sem_post(&touch_dev_controler_sem_control);
     return id;
 }
 
-int mouse_touch_id = -1;    //鼠标映射的ID 唯一 第一次产生移动事件时按下 之后只有移动  切换映射的时候才释放
-int mouse_Start_x = 720;    ///开始结束坐标 只读
-int mouse_Start_y = 1600;   //中途可能有切换 还是会回到这里的
+int mouse_touch_id = -1;  //鼠标映射的ID 唯一 第一次产生移动事件时按下 之后只有移动  切换映射的时候才释放
+int mouse_Start_x = 720;  ///开始结束坐标
+int mouse_Start_y = 1600; //中途可能有切换 还是会回到这里的
+int screen_x = 0;
+int screen_y = 0;
 int realtive_x, realtive_y; //保存当前移动坐标
 int mouse_speedRatio = 1;
 int km_map_id[256 + 8];      //键盘鼠标code 对应分配的ID 按下获取并存入 释放的时候就从这里获取ID释放
@@ -293,7 +302,7 @@ void handelEventQueue()              //处理所有事件
     { //有鼠标事件
         realtive_x -= y * mouse_speedRatio;
         realtive_y += x * mouse_speedRatio;
-        if (mouse_touch_id == -1 || realtive_x < 32 || realtive_x > mouse_Start_x * 2 - 32 || realtive_y < 32 || realtive_y > (mouse_Start_y - 200) * 2 - 32)
+        if (mouse_touch_id == -1 || realtive_x < 32 || realtive_x > screen_x || realtive_y < 32 || realtive_y > screen_y)
         {
             touch_dev_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);                               //松开
             mouse_touch_id = touch_dev_controler(MOUSE_REQUIRE, -1, mouse_Start_x, mouse_Start_y); //再按下
@@ -385,7 +394,7 @@ int Exclusive_mode()
     realtive_y = mouse_Start_y; //相对X,Y
     wheel_touch_id = -1;
     mouse_touch_id = -1;
-    SWITCH_ID_EVENT.value = 0xffff;
+    SWITCH_ID_EVENT.value = 0xffffffff;
     allocatedID_num = 0;
     close(touch_fd);
     return 0;
@@ -449,7 +458,7 @@ int Exclusive_mode_single_Dev_Version()
     realtive_y = mouse_Start_y; //相对X,Y
     wheel_touch_id = -1;
     mouse_touch_id = -1;
-    SWITCH_ID_EVENT.value = 0xffff;
+    SWITCH_ID_EVENT.value = 0xffffffff;
     allocatedID_num = 0;
     close(touch_fd);
     return 0;
@@ -528,6 +537,8 @@ int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备�
     }
     mouse_Start_x = config[0][0];
     mouse_Start_y = config[0][1];
+    screen_x = mouse_Start_x * 2 - 32;
+    screen_y = (mouse_Start_y - 200) * 2 - 32;
     mouse_speedRatio = config[0][2];
     for (int i = 0; i < 9; i++)
     {

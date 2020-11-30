@@ -4,7 +4,7 @@ import socket
 import time
 import _thread
 udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sendArr = ('127.0.0.1', 8848)
+sendArr = ('192.168.42.129', 8848)
 
 key_stause = [False for x in range(256)]
 
@@ -102,7 +102,7 @@ def main():
     hm.HookKeyboard()
     hm.MouseAll = onMouseEvent
     hm.HookMouse()
-    _thread.start_new_thread(tojs, ())
+    # _thread.start_new_thread(tojs, ())
     pythoncom.PumpMessages()
 
 
