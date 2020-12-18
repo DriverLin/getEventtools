@@ -25,6 +25,12 @@
 #define WHEEL_REQUIRE 0X3
 #define MOUSE_REQUIRE 0X4
 
+
+#define rand_offset() (rand()%80-40)//随机偏移 不需要改成0
+#define mini_rand_offset() (rand()%20-10)
+
+
+
 char touch_dev_path[80];
 char keyboard_dev_path[80];
 char mouse_dev_path[80];
@@ -201,7 +207,7 @@ void wheel_manager()
                     cur_y = tar_y;
             }
             if (div_x || div_y)
-                touch_dev_controler(MOVE_FLAG, wheel_touch_id, cur_x, cur_y); //正常移动
+                touch_dev_controler(MOVE_FLAG, wheel_touch_id, cur_x+mini_rand_offset(), cur_y+mini_rand_offset()); //正常移动
         }
         usleep(frequency);
     }
@@ -238,16 +244,16 @@ void change_wheel_satuse(int keyCode, int updown)
         tar_y = wheel_postion[4][1];
         cur_x = tar_x;
         cur_y = tar_y;                                                                                     //设置起始位置和目标位置为中点
-        wheel_touch_id = touch_dev_controler(WHEEL_REQUIRE, -1, wheel_postion[4][0], wheel_postion[4][1]); //按下中点
-        tar_x = wheel_postion[map_value][0];
-        tar_y = wheel_postion[map_value][1]; //设置移动目标
+        wheel_touch_id = touch_dev_controler(WHEEL_REQUIRE, -1, cur_x+rand_offset(), cur_y+rand_offset()); //按下中点
+        tar_x = wheel_postion[map_value][0]+rand_offset();
+        tar_y = wheel_postion[map_value][1]+rand_offset(); //设置移动目标
     }
     else
     {
         if (map_value != 4) //正常移动
         {
-            tar_x = wheel_postion[map_value][0];
-            tar_y = wheel_postion[map_value][1];
+            tar_x = wheel_postion[map_value][0]+rand_offset();
+            tar_y = wheel_postion[map_value][1]+rand_offset();
         }
         else //移动目标为中点 释放
         {
@@ -291,7 +297,7 @@ void handelEventQueue()              //处理所有事件
                 else if (map_postion[keyCode][0] && map_postion[keyCode][1])
                 { //映射坐标不为0 设定映射
                     if (updown == DOWN)
-                        km_map_id[keyCode] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[keyCode][0], map_postion[keyCode][1]); //按下
+                        km_map_id[keyCode] = touch_dev_controler(REQURIE_FLAG, -1, map_postion[keyCode][0]+rand_offset(), map_postion[keyCode][1]+rand_offset()); //按下
                     else
                         touch_dev_controler(RELEASE_FLAG, km_map_id[keyCode], 0, 0); //释放
                 }
@@ -304,10 +310,12 @@ void handelEventQueue()              //处理所有事件
         realtive_y += x * mouse_speedRatio;
         if (mouse_touch_id == -1 || realtive_x < 32 || realtive_x > screen_x || realtive_y < 32 || realtive_y > screen_y)
         {
+            int rand_X = rand_offset();
+            int rand_Y = rand_offset();
             touch_dev_controler(RELEASE_FLAG, mouse_touch_id, 0, 0);                               //松开
-            mouse_touch_id = touch_dev_controler(MOUSE_REQUIRE, -1, mouse_Start_x, mouse_Start_y); //再按下
-            realtive_x = mouse_Start_x - y * mouse_speedRatio;
-            realtive_y = mouse_Start_y + x * mouse_speedRatio; //相对X,Y
+            mouse_touch_id = touch_dev_controler(MOUSE_REQUIRE, -1, mouse_Start_x+rand_X, mouse_Start_y+rand_Y); //再按下
+            realtive_x = mouse_Start_x+rand_X - y * mouse_speedRatio;
+            realtive_y = mouse_Start_y+rand_Y + x * mouse_speedRatio; //相对X,Y
         }
         touch_dev_controler(MOVE_FLAG, mouse_touch_id, realtive_x, realtive_y); //移动
     }
@@ -492,6 +500,7 @@ int no_Exclusive_mode()
 int main(int argc, char *argv[]) //触屏设备号 键盘设备号 鼠标设备号 mapper映射文件路径
                                  //首先是非独占模式 由`键启动进入独占模式 独占模式也可以退出到非独占 非独占只关注`键
 {
+    srand((unsigned)time(NULL));//点击坐标+随机数
     int touch_dev_num = atoi(argv[1]);
     int mouse_dev_num = atoi(argv[2]);
     int keyboard_dev_num = atoi(argv[3]);
