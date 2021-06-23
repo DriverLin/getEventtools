@@ -117,6 +117,7 @@ int creat_user_uinput(void)
     ioctl(uinput_fd, UI_SET_EVBIT, EV_REL);
     ioctl(uinput_fd, UI_SET_RELBIT, REL_X);
     ioctl(uinput_fd, UI_SET_RELBIT, REL_Y);
+    ioctl(uinput_fd, UI_SET_RELBIT, REL_WHEEL);
 
     for (int i = 0x110; i < 0x117; i++)
     {
