@@ -41,7 +41,7 @@ struct input_event BTN_UP_EVENT = {.type = EV_KEY, .code = BTN_TOUCH, .value = U
 int ABS_X_RANGE, ABS_Y_RANGE, ABS_Z_RANGE, ABS_RZ_RANGE, ABS_GAS_RANGE, ABS_BRAKE_RANGE; //线性摇杆范围
 int ABS_X_MID, ABS_Y_MID, ABS_Z_MID, ABS_RZ_MID, ABS_GAS_MID, ABS_BRAKE_MID;
 
-int deadband = 8;
+int deadband = 32;
 //type = 0,1,2 id = -1,.... ,x,y      ID为-1 则是按下，获取返回的ID，下次带上才可进行滑动或者释放操作
 //x,y为绝对坐标 越界重置也由外部完成
 //按下 移动 释放
