@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mappertool</title>
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
-    <link href=https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css rel="stylesheet">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- <link href=https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
     <script type="text/javascript">
         var dowing = false
         var dowKey
@@ -206,7 +206,7 @@
             "'": 40,
             "Cape Lock": 58,
             "Alt": 56,
-            "BTN_MOUSE": 256,//额外的
+            "BTN_MOUSE": 256, //额外的
             "BTN_LEFT": 256,
             "BTN_RIGHT": 257,
             "BTN_MIDDLE": 258,
@@ -217,26 +217,49 @@
             "BTN_TASK": 263
         }
 
+        var gamepad = null
+        const indexButton = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "SELECT", "BACK", "LS", "RS", "UP", "DOWN", "LEFT", "RIGHT"]
+        const ButtomMapLinuxCode = {
+            "A": 0,
+            "B": 1,
+            "X": 3,
+            "Y": 4,
+            "LB": 6,
+            "RB": 7,
+            "LT": 22,
+            "RT": 20,
+            "BACK": 10,
+            "START": 11,
+            "LS": 13,
+            "RS": 14,
+            "UP": 24,
+            "DOWN": 26,
+            "LEFT": 27,
+            "RIGHT": 29
+        }
+
         function getNaturalWidth(img) {
             var image = new Image()
             image.src = img.src
             var naturalWidth = image.width
             return naturalWidth
         }
+
         function getNaturalHeight(img) {
             var image = new Image()
             image.src = img.src
             var naturalWidth = image.height
             return naturalWidth
         }
+
         function getMapper() {
             var text = ""
             const target = document.getElementById('img')
             var Y = getNaturalWidth(target)
             var X = getNaturalHeight(target)
             console.log(Y, X)
-            var kw = list[87]//确定长度
-            var ks = list[83]//确定原点
+            var kw = list[87] //确定长度
+            var ks = list[83] //确定原点
             var relative = 300
             if (kw != undefined && ks != undefined) {
                 relative = Math.sqrt(Math.pow(kw.x * X - ks.x * X, 2) + Math.pow(kw.y * Y - ks.y * Y, 2))
@@ -253,22 +276,22 @@
             console.log("x:" + parseInt(wheel_start_x), "   y:" + parseInt(wheely_start_y), "   len:" + parseInt(relative))
             text += parseInt(X / 2) + " " + parseInt(Y / 2 + 200) + " 1\n"
             var wheelNumCount = 0;
-            for (var posY of [parseInt(wheely_start_y - relative), parseInt(wheely_start_y), parseInt(wheely_start_y + relative)]) {
-                for (var posX of [parseInt(wheel_start_x - relative), parseInt(wheel_start_x), parseInt(wheel_start_x + relative)]) {
-                    text += wheelNumCount + " " + posX + " " + posY + "\n";
+            for (var posY of[parseInt(wheely_start_y - relative), parseInt(wheely_start_y), parseInt(wheely_start_y + relative)]) {
+                for (var posX of[parseInt(wheel_start_x - relative), parseInt(wheel_start_x), parseInt(wheel_start_x + relative)]) {
+                    appendText = wheelNumCount + " " + posX + " " + posY + "\n"
+                    text += appendText
                     wheelNumCount++
                 }
             }
 
             for (var k in list) {
-                var kname = jskmap[k];//JScode获取名称
+                var kname = jskmap[k]; //JScode获取名称
                 var py = parseInt(list[k].x * Y);
-                var px = parseInt((1 - list[k].y) * X);//换到Linux
+                var px = parseInt((1 - list[k].y) * X); //换到Linux
 
-                if (kname == "W" || kname == "A" || kname == "S" || kname == "D") {//ws用来确定左摇杆了
+                if (kname == "W" || kname == "A" || kname == "S" || kname == "D") { //ws用来确定左摇杆了
                     console.log("pass\n");
-                }
-                else if (kname in linuxKmap) {
+                } else if (kname in linuxKmap) {
                     text += linuxKmap[kname] + " " + px + " " + py + "\n"
                 }
             }
@@ -280,42 +303,106 @@
             document.execCommand("Copy"); // 执行浏览器复制命令
             $('#copy').remove();
         }
-        document.onclick = function (event) {
 
-            if (dowing) {
-                const target = document.getElementById('img')
-                var x = event.offsetX / target.offsetWidth
-                var y = event.offsetY / target.offsetHeight
-                console.log(dowKey)
-                console.log(x, y)
-                var km = {
-                    'key': jskmap[dowKey],
-                    'x': x,
-                    'y': y
+        const getMapperJS = () => {
+            var text = "720 1760 1\n300 300 300\n"
+            const target = document.getElementById('img')
+            var Y = getNaturalWidth(target)
+            var X = getNaturalHeight(target)
+            for (var k in list) {
+                var kname = k; //JScode获取名称
+                var py = parseInt(list[k].x * Y);
+                var px = parseInt((1 - list[k].y) * X); //换到Linux
+                textAppend = ButtomMapLinuxCode[kname] + " " + px + " " + py + "\n"
+                text += textAppend
+            }
+            console.log(text)
+            console.log(list)
+            $('body').append(`<textarea type="text" id="copy"></input>`)
+            document.getElementById('copy').value = text;
+            $('#copy').select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+            $('#copy').remove();
+        }
+
+
+
+
+        document.onclick = function(event) {
+            if (gamepad === null) { //一旦检测到手柄 就禁用了按键模式
+                if (dowing) {
+                    const target = document.getElementById('img')
+                    var x = event.offsetX / target.offsetWidth
+                    var y = event.offsetY / target.offsetHeight
+                    console.log(dowKey)
+                    console.log(x, y)
+                    var km = {
+                        'key': jskmap[dowKey],
+                        'x': x,
+                        'y': y
+                    }
+                    list[dowKey] = km;
+                    $('.mask').empty()
+                    var Arrary = []
+                    for (var key in list) {
+                        var value = list[key];
+                        Arrary.push(value)
+                        $('.mask').append(`
+                            <button class="button" style="top:${target.offsetHeight * value.y - 16}px;left:${target.offsetWidth * value.x - 16}px;">${value.key}</button>
+                        `)
+                    }
+                    getMapper()
+                    return false;
                 }
-                list[dowKey] = km;
-                $('.mask').empty()
-                var Arrary = []
-                for (var key in list) {
-                    var value = list[key];
-                    Arrary.push(value)
-                    $('.mask').append(`
-                <button class="button" style="top:${target.offsetHeight * value.y - 16}px;left:${target.offsetWidth * value.x - 16}px;">${value.key}</button>
-                `)
+            } else {
+                currentStause = navigator.getGamepads()[gamepad].buttons
+                let pressDownCounts = 0 //按下按键数量
+                let downButtonName = -1 //按下按键的名称
+                let downValue = 0 //按下按键的值 考虑到两个扳机
+                for (let i = 0; i < 17; i++) { //暂时仅支持XBOX
+                    const button = currentStause[i]
+                    if (button.pressed) {
+                        pressDownCounts += 1
+                            // console.log(indexButton[i], ":", button.value)
+                        downButtonName = indexButton[i]
+                        downValue = button.value
+                    }
                 }
-                getMapper()
+                if (pressDownCounts === 1) { //仅有一个按钮按下 响应
+                    const target = document.getElementById('img')
+                    var x = event.offsetX / target.offsetWidth
+                    var y = event.offsetY / target.offsetHeight
+                    console.log(downButtonName)
+                    console.log(x, y)
+                    var km = {
+                        'key': downButtonName,
+                        'x': x,
+                        'y': y
+                    }
+                    list[downButtonName] = km;
+                    $('.mask').empty()
+                    var Arrary = []
+                    for (var key in list) {
+                        var value = list[key];
+                        Arrary.push(value)
+                        $('.mask').append(`
+                            <button class="button" style="top:${target.offsetHeight * value.y - 16}px;left:${target.offsetWidth * value.x - 16}px;">${value.key}</button>
+                        `)
+                    }
+                    getMapperJS()
+                }
                 return false;
             }
         }
-        document.onkeydown = function (event) {
+        document.onkeydown = function(event) {
             dowing = true
             dowKey = event.keyCode
             return false;
         }
-        document.onkeyup = function (event) {
+        document.onkeyup = function(event) {
             dowing = false
         }
-        document.oncontextmenu = function (e) {
+        document.oncontextmenu = function(e) {
             e.preventDefault();
         };
 
@@ -323,35 +410,52 @@
             var reads = new FileReader();
             f = document.getElementById('fileInput').files[0];
             reads.readAsDataURL(f);
-            reads.onload = function (e) {
+            reads.onload = function(e) {
                 document.getElementById('img').src = this.result;
             };
             document.getElementById('mainContainer').hidden = false;
             document.getElementById('uploadBtn').hidden = true;
         }
+
         function uploadImg() {
             document.getElementById('fileInput').click();
         }
+
+
+
+        window.addEventListener("gamepadconnected", function(e) {
+            var gp = navigator.getGamepads()[e.gamepad.index];
+            console.log(
+                "Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                gp.index,
+                gp.id,
+                gp.buttons.length,
+                gp.axes.length
+            );
+            console.log(gp);
+            alert("手柄已连接")
+            gamepad = e.gamepad.index
+        })
     </script>
     <style type="text/css">
         body {
             background: #00796B;
         }
-
+        
         .pic {
             height: 100%;
             width: 100%;
             left: 0px;
             top: 0px;
         }
-
+        
         .pic img {
             float: left;
             width: 100%;
             left: 0px;
             top: 0px;
         }
-
+        
         .mask {
             z-index: 1;
             position: absolute;
@@ -360,7 +464,7 @@
             left: 0px;
             top: 0px;
         }
-
+        
         .mask button {
             height: 32px;
             width: 32px;
@@ -371,7 +475,7 @@
             color: whitesmoke;
             background-color: #D90051;
         }
-
+        
         #uploadBtn {
             position: absolute;
             width: 200px;
@@ -387,7 +491,7 @@
             color: white;
             box-shadow: 0 0 5px #000;
         }
-
+        
         #uploadBtn:hover {
             box-shadow: 0 0 20px #000;
             outline: none;
@@ -395,7 +499,7 @@
             margin-left: -145px;
             border: 5px solid #00b894;
         }
-
+        
         #uploadBtn:focus {
             outline: none;
         }
