@@ -56,9 +56,15 @@ W用于限制摇杆范围
 
 
 ## 手柄部分
-mapper文件参照input.h填写
+~~mapper文件参照input.h填写~~
 
-键值为 ```REAL_KEYCODE - 0X130```
+[创建映射文件](https://driverlin.github.io/Exclusive_mode_mapper/)
+
+手柄插入后会转换到手柄映射文件生成模式
+
+摇杆默认位置固定，有需要可以直接修改生成的mapper文件
+
+部分按键键值为 ```REAL_KEYCODE - 0X130```
 
 select+RS切换
 
